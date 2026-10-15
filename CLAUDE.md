@@ -11,6 +11,12 @@ open things on the laptop (Chrome search, YouTube/Spotify, files).
 It is a **local desktop agent**: the FastAPI backend runs on the student's
 own machine, which is what lets it move files and open the browser.
 
+The assistant is called **Khushi** (she/her). Use that name in the chat UI,
+greetings and notifications. Simple commands ("open Spotify") must work
+without the LLM; the free-tier quota is saved for real understanding work.
+
+`AGENTS.md` is a symlink to this file. Edit this one.
+
 Full plan: `~/.claude/plans/lets-make-the-context-os-quirky-hopcroft.md`.
 
 ## Where things stand
@@ -18,8 +24,8 @@ Full plan: `~/.claude/plans/lets-make-the-context-os-quirky-hopcroft.md`.
 | Phase | State |
 |---|---|
 | 00 Scaffold | done - FastAPI + SQLite tables + `contextos serve`, React shell with page placeholders |
-| 01 LLM layer (Gemini / Groq, JSON mode, rate limit, cache) | not started |
-| 02 File organiser (scan, extract, OCR, classify, plan, move + undo, watch) | not started |
+| 01 LLM layer | done - Gemini + Groq over HTTP, JSON mode with one repair retry, rate limiter, disk cache, quota-aware fallback model |
+| 02 File organiser | done - scan, extract (PyMuPDF / OCR / docx / pptx), rules-then-LLM classify, dry-run plan, move + undo, folder watcher; Organize, Files, Settings pages |
 | 03 Deadlines & tasks (extracted deadlines, CRUD, reminders) | not started |
 | 04 Weekly progress (study timer, chart, AI summary) | not started |
 | 05 Chat assistant + local actions | not started |
@@ -29,9 +35,10 @@ Full plan: `~/.claude/plans/lets-make-the-context-os-quirky-hopcroft.md`.
 
 ```bash
 # backend (from backend/)
-python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev,llm,ingest]"
 .venv/bin/contextos serve --reload          # API on :8000
 .venv/bin/python -m pytest -q && .venv/bin/ruff check src tests
+.venv/bin/python scripts/make_demo_files.py /tmp/demo/Downloads   # messy files to try it on
 
 # frontend (from frontend/)
 npm install
@@ -55,3 +62,29 @@ npm run build                                # dist/ is then served by `contexto
 - Heavy dependencies live in pyproject extras per phase (`llm`, `ingest`,
   `reminders`); import them lazily inside the module that needs them.
 - This machine has no NVIDIA GPU - keep everything CPU-friendly.
+
+## How the organiser decides (Phase 02)
+
+- **Rules first** (`ingest/classify.py`): keywords in the file name (weight 3)
+  and first 3000 chars (weight 1) pick the type; subject names, codes and
+  aliases pick the subject. Short aliases (`OS`, `CN`) only count in body text
+  when written in caps. Below `LLM_THRESHOLD` (0.6) the LLM is asked.
+- A file with no readable text *and* a junk name (`scan0003.pdf`) never goes
+  to the LLM - there is nothing to send. A filename-only LLM guess is capped
+  at 0.4 confidence so the UI says "check this".
+- Subjects the LLM invents are created on the fly; a subject without a
+  semester learns it from the first file that states one, and files already
+  planned for it are re-planned (`pipeline._learn_semester`).
+- Deadlines need a deadline word on the line ("due", "submit", "last date")
+  and must be in the future. `Task.due_at` is local wall-clock time
+  (`NaiveDatetime`); every other timestamp is UTC.
+
+## Gemini free tier, as observed 2026-10-15
+
+- `gemini-3.8-flash`: **20 requests/day** on the free tier. Its 429 carries
+  `RetryInfo.retryDelay` of hours, which the provider turns into
+  `ModelUnavailable` -> straight to the fallback, main skipped until reset.
+- `gemini-2.5-flash` is 404 "no longer available to new users".
+- `thinkingLevel: minimal` halves latency (~19s -> ~9s) on 3.5-flash.
+- `pkill -f "contextos serve ..."` kills the calling shell too (its own
+  command line matches) - use `pkill -f "[c]ontextos serve"`.

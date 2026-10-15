@@ -22,9 +22,20 @@ document is sent for classification.
 
 ```bash
 cd backend
-python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"
-cp ../.env.example .env        # optional
+python3 -m venv .venv && .venv/bin/pip install -e ".[dev,llm,ingest]"
+cp ../.env.example .env        # optional: add a free Gemini or Groq key
 .venv/bin/contextos serve --reload
+```
+
+To read scanned PDFs, also install Tesseract (`sudo apt install tesseract-ocr`).
+
+Want to try it without touching your real Downloads? Generate a folder of
+messy demo files and point ContextOS at it:
+
+```bash
+.venv/bin/python scripts/make_demo_files.py ~/contextos-demo/Downloads
+WATCH_DIRS=~/contextos-demo/Downloads LIBRARY_ROOT=~/contextos-demo/Library \
+  .venv/bin/contextos serve
 ```
 
 ```bash
@@ -39,4 +50,5 @@ PyMuPDF + Tesseract OCR · Gemini / Groq (free tier)
 
 ## Status
 
-Early development. See the phase table in [CLAUDE.md](CLAUDE.md).
+The file organiser works end to end (phases 0-2). Deadlines, progress tracking and
+the chat assistant are next - see the phase table in [CLAUDE.md](CLAUDE.md).
