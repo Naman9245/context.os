@@ -7,7 +7,6 @@ environment - they are never written to the database.
 
 from __future__ import annotations
 
-from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Literal
 
@@ -33,14 +32,32 @@ class Settings(BaseSettings):
         default_factory=lambda: [Path.home() / "Downloads"]
     )
 
+    # Watch WATCH_DIRS and scan automatically when a new file lands.
+    watch_enabled: bool = True
+    # How deep to look inside each watched folder (0 = only the folder itself).
+    scan_max_depth: int = 3
+    # How to read ambiguous numeric dates like 04/05/2026 found in documents.
+    date_order: Literal["DMY", "MDY"] = "DMY"
+
     # "none" is the heuristics-only mode: nothing leaves the machine.
     llm_provider: LLMProviderName = "none"
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.5-flash"
+    gemini_model: str = "gemini-3.5-flash"
+    # Used when the main model is overloaded or rate-limited.
+    gemini_fallback_model: str = "gemini-3.1-flash-lite"
+    # How hard Gemini thinks before answering: minimal | low | medium | high, or empty for
+    # the model's default. Sorting files needs little, and "minimal" is about twice as fast.
+    gemini_thinking_level: str = "minimal"
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
+    groq_fallback_model: str = "llama-3.1-8b-instant"
     # Characters of a document's text sent to the LLM, never the whole file.
     llm_snippet_chars: int = 1500
+    # Free tiers allow roughly 10-30 requests a minute; stay under it.
+    llm_requests_per_minute: int = 10
+    # Retries per model on "busy" errors before moving to the fallback model.
+    llm_max_retries: int = 2
+    llm_timeout_seconds: float = 60.0
 
     host: str = "127.0.0.1"
     port: int = 8000
@@ -66,7 +83,22 @@ class Settings(BaseSettings):
     def database_url(self) -> str:
         return f"sqlite:///{self.data_dir / 'contextos.db'}"
 
+    @property
+    def llm_cache_dir(self) -> Path:
+        return self.data_dir / "llm_cache"
 
-@lru_cache
+
+_settings: Settings | None = None
+
+
 def get_settings() -> Settings:
-    return Settings()
+    global _settings
+    if _settings is None:
+        _settings = Settings()
+    return _settings
+
+
+def set_settings(settings: Settings | None) -> None:
+    """Swap the settings - used by tests so nothing touches the real home folder."""
+    global _settings
+    _settings = settings
