@@ -81,6 +81,11 @@ def main(out: Path) -> None:
         "BCS403 - Database Management Systems\nModule 3: Normalization\n"
         "Functional dependencies, 1NF, 2NF, 3NF and BCNF.\nLossless join decomposition.")
     shutil.copy(out / "Module3_final(2).pdf", out / "Module3_final(2) (1).pdf")  # a duplicate
+    # An assignment with no deadline written in it: Khushi asks when it's due.
+    pdf(out / "OS_Assignment_3.pdf",
+        "BCS303 - Operating Systems\nAssignment 3: Memory Management\n"
+        "Q1. Explain paging with a neat diagram.\nQ2. Compare FIFO and LRU page replacement.\n"
+        "Q3. What is thrashing? How can it be prevented?")
     pdf(out / "os question paper 2024.pdf",
         "BCS303 - Operating Systems\nThird Semester B.E. Examination, Dec 2024\n"
         "Time: 3 hrs   Max. Marks: 100\nAnswer any FIVE full questions.\n"

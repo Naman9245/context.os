@@ -44,9 +44,13 @@ class TaskSource(StrEnum):
 
 
 class TaskStatus(StrEnum):
-    suggested = "suggested"  # found in a document, waiting for the user to accept
+    # Found in a document and waiting for the user: either a deadline to confirm,
+    # or (due_at empty) an assignment Khushi could not find a deadline for.
+    suggested = "suggested"
     todo = "todo"
     done = "done"
+    # The user said "not a deadline" - kept so a rescan does not suggest it again.
+    dismissed = "dismissed"
 
 
 class ActivityKind(StrEnum):
@@ -114,6 +118,20 @@ class Task(SQLModel, table=True):
     status: TaskStatus = Field(default=TaskStatus.todo, index=True)
     created_at: datetime = Field(default_factory=utcnow)
     completed_at: datetime | None = None
+    # Reminder offsets (days before due) already sent, so each fires once.
+    reminded_days: list[int] | None = Field(default=None, sa_column=Column(JSON))
+
+
+class TaskStep(SQLModel, table=True):
+    """One line of an assignment's to-do list."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    task_id: int = Field(foreign_key="task.id", index=True)
+    text: str
+    done: bool = False
+    position: int = 0
+    # Who wrote it: "you", "rules", or the LLM provider's name.
+    written_by: str = "you"
 
 
 class StudySession(SQLModel, table=True):

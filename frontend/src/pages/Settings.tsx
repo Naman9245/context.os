@@ -11,6 +11,7 @@ export default function Settings() {
   const [form, setForm] = useState(EMPTY)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [testResult, setTestResult] = useState<string | null>(null)
 
   const load = () => api.get<Subject[]>('/subjects').then(setSubjects)
 
@@ -179,6 +180,26 @@ export default function Settings() {
                       <code className="font-mono">sudo apt install tesseract-ocr</code>
                     </>
                   )}
+                </dd>
+                <dt className="text-zinc-500">Reminders</dt>
+                <dd>
+                  {health.reminder_days.length
+                    ? `${health.reminder_days.join(' and ')} days before each deadline`
+                    : 'Off'}
+                  {!health.notifications_available && ' (desktop notifications unavailable)'}
+                  <div className="mt-1 flex items-center gap-2">
+                    <Button
+                      onClick={async () => {
+                        const r = await api.post<{ sent: boolean }>('/tasks/test-notification')
+                        setTestResult(
+                          r.sent ? 'Sent - check the top of your screen.' : "Couldn't show it.",
+                        )
+                      }}
+                    >
+                      Send a test reminder
+                    </Button>
+                    {testResult && <span className="text-xs text-zinc-500">{testResult}</span>}
+                  </div>
                 </dd>
                 <dt className="text-zinc-500">Watched folders</dt>
                 <dd className="font-mono text-xs">

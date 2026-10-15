@@ -20,6 +20,7 @@ def settings(tmp_path):
         library_root=tmp_path / "library",
         watch_dirs=[tmp_path / "inbox"],
         watch_enabled=False,
+        reminders_enabled=False,
         llm_provider="none",
     )
     (tmp_path / "inbox").mkdir()

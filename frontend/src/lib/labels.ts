@@ -28,3 +28,13 @@ export function timeAgo(iso: string): string {
 }
 
 export const basename = (path: string) => path.split(/[\\/]/).pop() ?? path
+
+/** "today", "tomorrow", "in 5 days", "2 days late" */
+export function dueIn(daysLeft: number | null): string {
+  if (daysLeft === null) return 'no deadline'
+  if (daysLeft === 0) return 'today'
+  if (daysLeft === 1) return 'tomorrow'
+  if (daysLeft === -1) return '1 day late'
+  if (daysLeft < 0) return `${-daysLeft} days late`
+  return `in ${daysLeft} days`
+}

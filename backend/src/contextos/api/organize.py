@@ -16,6 +16,7 @@ from contextos.ingest.jobs import scan_job
 from contextos.ingest.mover import apply_plan, undo_batch
 from contextos.ingest.pipeline import get_or_create_subject, replan
 from contextos.models import DocStatus, DocType, Document, MoveLog, utcnow
+from contextos.tasks.service import drop_unanswered_question, ensure_assignment_task
 
 router = APIRouter(prefix="/organize", tags=["organize"])
 
@@ -100,8 +101,12 @@ def edit_document(doc_id: int, edit: DocumentEdit,
     if edit.subject is not None:
         doc.subject_id = get_or_create_subject(session, edit.subject).id \
             if edit.subject.strip() else None
-    if edit.doc_type is not None:
+    if edit.doc_type is not None and edit.doc_type != doc.doc_type:
         doc.doc_type = edit.doc_type
+        if doc.doc_type == DocType.assignment:
+            ensure_assignment_task(session, doc)
+        else:
+            drop_unanswered_question(session, doc)
     if edit.title is not None and edit.title.strip():
         doc.title = edit.title.strip()[:120]
     if edit.semester is not None:

@@ -28,11 +28,40 @@ FRONTEND_DIST = Path(__file__).resolve().parents[3] / "frontend" / "dist"
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
 
+def _start_reminders(settings) -> object | None:
+    from datetime import datetime
+
+    from sqlmodel import Session
+
+    from contextos.agent.notify import notify
+    from contextos.db import get_engine
+    from contextos.tasks.reminders import ReminderLoop, run_reminders
+
+    def check() -> None:
+        with Session(get_engine()) as session:
+            sent = run_reminders(session, now=datetime.now(), offsets=settings.reminder_days,
+                                 send=notify)
+        for title in sent:
+            log.info("reminded: %s", title)
+
+    loop = ReminderLoop(check, every_seconds=settings.reminder_check_minutes * 60)
+    loop.start()
+    return loop
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     init_db()
+    from sqlmodel import Session
+
+    from contextos.db import get_engine
+    from contextos.tasks.service import ensure_assignment_tasks
+
+    with Session(get_engine()) as session:
+        ensure_assignment_tasks(session)  # assignments scanned before tasks existed
     app.state.watcher = None
     settings = get_settings()
+    app.state.reminders = _start_reminders(settings) if settings.reminders_enabled else None
     if settings.watch_enabled:
         try:
             from contextos.ingest.jobs import scan_job
@@ -47,6 +76,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
     if app.state.watcher is not None:
         app.state.watcher.stop()
+    if app.state.reminders is not None:
+        app.state.reminders.stop()
 
 
 def _hostname(value: str) -> str:
