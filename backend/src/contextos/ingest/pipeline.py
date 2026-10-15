@@ -31,6 +31,7 @@ from contextos.models import (
     TaskStatus,
     utcnow,
 )
+from contextos.tasks.service import ensure_assignment_task
 
 log = logging.getLogger(__name__)
 
@@ -175,6 +176,8 @@ def _process_new(
             status=TaskStatus.suggested,
         ))
         report.deadlines += 1
+    # An assignment with no deadline in it becomes a question: "when is this due?"
+    ensure_assignment_task(session, doc)
 
 
 def scan(

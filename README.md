@@ -7,8 +7,9 @@ students who are drowning in PDFs, assignments and deadlines.
   every PDF (including scanned ones), works out the subject and type, and
   moves it into a clean `Semester / Subject / Type /` library. You approve
   every move first, and any move can be undone.
-- **Finds your deadlines.** It pulls due dates out of assignment sheets and
-  notices and turns them into tasks with desktop reminders.
+- **Keeps track of your assignments.** Khushi, the assistant, finds due dates in
+  assignment sheets and notices, asks you when one has none, writes a to-do
+  checklist for each assignment, and reminds you 5 and 3 days before.
 - **Tracks your week.** It includes a study timer, a weekly progress chart,
   and an AI summary of where your time went.
 - **Does things for you.** "What's due this week?", "search normalisation in
@@ -50,5 +51,6 @@ PyMuPDF + Tesseract OCR · Gemini / Groq (free tier)
 
 ## Status
 
-The file organiser works end to end (phases 0-2). Deadlines, progress tracking and
-the chat assistant are next - see the phase table in [CLAUDE.md](CLAUDE.md).
+The file organiser and assignments with reminders work end to end (phases 0-3).
+Khushi's chat (opening apps, web search) and voice are next - see the phase table
+in [CLAUDE.md](CLAUDE.md).

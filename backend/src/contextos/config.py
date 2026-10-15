@@ -39,6 +39,11 @@ class Settings(BaseSettings):
     # How to read ambiguous numeric dates like 04/05/2026 found in documents.
     date_order: Literal["DMY", "MDY"] = "DMY"
 
+    # Khushi reminds you this many days before a deadline. Comma-separated.
+    reminder_days: Annotated[list[int], NoDecode] = Field(default_factory=lambda: [5, 3])
+    reminders_enabled: bool = True
+    reminder_check_minutes: int = 15
+
     # "none" is the heuristics-only mode: nothing leaves the machine.
     llm_provider: LLMProviderName = "none"
     gemini_api_key: str = ""
@@ -68,6 +73,18 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [p.strip() for p in value.split(",") if p.strip()]
         return value
+
+    @field_validator("reminder_days", mode="before")
+    @classmethod
+    def _split_days(cls, value: object) -> object:
+        if isinstance(value, str):
+            return [int(d) for d in value.split(",") if d.strip()]
+        return value
+
+    @field_validator("reminder_days", mode="after")
+    @classmethod
+    def _sort_days(cls, value: list[int]) -> list[int]:
+        return sorted({d for d in value if d >= 0}, reverse=True)
 
     @field_validator("data_dir", "library_root", mode="after")
     @classmethod

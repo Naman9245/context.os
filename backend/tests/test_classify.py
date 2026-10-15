@@ -180,6 +180,13 @@ def test_filename_only_ai_guess_is_not_sure():
     assert len(llm.prompts) == 1 and result.confidence < 0.6
 
 
+def test_unexpected_ai_reply_still_falls_back_to_rules():
+    llm = FakeLLM({"steps": ["not a classification"]})  # fails schema validation
+    result = classify("scan0001.pdf", Extracted("unclear text", "pdf"), SUBJECTS, llm=llm,
+                      today=TODAY)
+    assert result.classified_by == "rules" and result.llm_error.startswith("AI error")
+
+
 def test_llm_may_propose_a_new_subject():
     llm = FakeLLM({"doc_type": "notes", "subject": "Machine Learning", "title": "Intro"})
     result = classify("scan.pdf", Extracted("Gradient descent", "pdf"), SUBJECTS, llm=llm,

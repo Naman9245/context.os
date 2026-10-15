@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import KhushiCard from '../components/Khushi'
 import Page from '../components/Page'
 import { Card, Notice } from '../components/ui'
-import { api, type Doc, type Health, type ScanStatus, type Subject } from '../lib/api'
-import { formatDue } from '../lib/labels'
+import { api, type Doc, type Health, type ScanStatus, type Subject, type Task } from '../lib/api'
+import { dueIn, formatDue } from '../lib/labels'
 
 export default function Dashboard() {
   const [health, setHealth] = useState<Health | null>(null)
   const [status, setStatus] = useState<ScanStatus | null>(null)
   const [files, setFiles] = useState<Doc[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
-  const [plan, setPlan] = useState<Doc[]>([])
+  const [tasks, setTasks] = useState<Task[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -19,16 +20,13 @@ export default function Dashboard() {
       api.get<ScanStatus>('/organize/status').then(setStatus),
       api.get<Doc[]>('/files').then(setFiles),
       api.get<Subject[]>('/subjects').then(setSubjects),
-      api.get<Doc[]>('/organize/plan').then(setPlan),
+      api.get<Task[]>('/tasks').then(setTasks),
     ]).catch((e) => setError(String(e)))
   }, [])
 
-  // Deadlines found in files, soonest first, until the Tasks page exists (Phase 3).
-  const deadlines = [...plan, ...files]
-    .flatMap((d) => d.deadlines.map((dl) => ({ ...dl, doc: d })))
-    .filter((d) => d.status !== 'done' && d.due_at)
-    .sort((a, b) => a.due_at!.localeCompare(b.due_at!))
-    .slice(0, 5)
+  const upcoming = tasks.filter((t) => t.status === 'todo' && t.due_at).slice(0, 5)
+  const openCount = tasks.filter((t) => t.status === 'todo').length
+  const questions = tasks.filter((t) => t.status === 'suggested').length
 
   if (error) {
     return (
@@ -44,6 +42,7 @@ export default function Dashboard() {
   return (
     <Page title="Dashboard" subtitle="Your files, deadlines and week at a glance.">
       <div className="space-y-4">
+        <KhushiCard />
         {subjects.length === 0 && health && (
           <Notice tone="info">
             Start by adding your subjects in{' '}
@@ -77,26 +76,36 @@ export default function Dashboard() {
               </div>
             </Card>
           </Link>
-          <Card className="h-full">
-            <div className="text-xs font-medium tracking-wide text-zinc-500 uppercase">
-              Deadlines found
-            </div>
-            <div className="mt-1 text-3xl font-semibold">{deadlines.length}</div>
-            <div className="text-sm text-zinc-500">upcoming, from your files</div>
-          </Card>
+          <Link to="/tasks">
+            <Card className="h-full hover:border-accent">
+              <div className="text-xs font-medium tracking-wide text-zinc-500 uppercase">
+                Assignments
+              </div>
+              <div className="mt-1 text-3xl font-semibold">{openCount}</div>
+              <div className="text-sm text-zinc-500">
+                to do{questions ? ` · ${questions} need your answer` : ''}
+              </div>
+            </Card>
+          </Link>
         </div>
 
-        {deadlines.length > 0 && (
+        {upcoming.length > 0 && (
           <Card className="p-0">
             <div className="border-b border-zinc-200 px-4 py-2 text-sm font-semibold dark:border-zinc-800">
               Coming up
             </div>
             <ul className="divide-y divide-zinc-100 text-sm dark:divide-zinc-800">
-              {deadlines.map((d) => (
-                <li key={d.id} className="flex gap-3 px-4 py-2">
-                  <span className="w-28 shrink-0 text-zinc-500">{formatDue(d.due_at)}</span>
-                  <span className="truncate">{d.title}</span>
-                  <span className="ml-auto truncate text-xs text-zinc-400">{d.doc.subject}</span>
+              {upcoming.map((t) => (
+                <li key={t.id}>
+                  <Link to="/tasks" className="flex gap-3 px-4 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                    <span
+                      className={`w-32 shrink-0 ${t.days_left !== null && t.days_left < 0 ? 'text-red-600' : 'text-zinc-500'}`}
+                    >
+                      {formatDue(t.due_at)} · {dueIn(t.days_left)}
+                    </span>
+                    <span className="truncate">{t.title}</span>
+                    <span className="ml-auto truncate text-xs text-zinc-400">{t.subject}</span>
+                  </Link>
                 </li>
               ))}
             </ul>

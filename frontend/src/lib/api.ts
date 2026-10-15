@@ -42,6 +42,8 @@ export type Health = {
   llm_model: string | null
   ocr_available: boolean
   watching: boolean
+  notifications_available: boolean
+  reminder_days: number[]
   library_root: string
   watch_dirs: string[]
 }
@@ -119,4 +121,32 @@ export type Subject = {
   semester: string | null
   color: string | null
   documents: number
+}
+
+export type TaskStatus = 'suggested' | 'todo' | 'done' | 'dismissed'
+
+export type Step = { id: number; text: string; done: boolean; written_by: string }
+
+export type Task = {
+  id: number
+  title: string
+  notes: string | null
+  subject_id: number | null
+  subject: string | null
+  subject_color: string | null
+  due_at: string | null
+  days_left: number | null
+  status: TaskStatus
+  source: 'manual' | 'chat' | 'extracted'
+  document_id: number | null
+  document_name: string | null
+  steps: Step[]
+  completed_at: string | null
+}
+
+export type Briefing = {
+  name: string
+  greeting: string
+  lines: { text: string; link: string | null; tone: 'info' | 'warn' | 'good' }[]
+  counts: Record<string, number>
 }

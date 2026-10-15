@@ -392,8 +392,8 @@ def classify(
         out = llm.complete_json(
             _prompt(filename, snippet, subjects, rules, today), LLMClassification, system=SYSTEM
         )
-    except LLMError as e:
-        rules.llm_error = str(e)[:300]
+    except Exception as e:  # any AI trouble (quota, bad JSON, network) falls back to rules
+        rules.llm_error = str(e)[:300] if isinstance(e, LLMError) else f"AI error: {e}"[:300]
         return rules
 
     deadlines = list(rules.deadlines)

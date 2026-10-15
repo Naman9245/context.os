@@ -26,7 +26,7 @@ Full plan: `~/.claude/plans/lets-make-the-context-os-quirky-hopcroft.md`.
 | 00 Scaffold | done - FastAPI + SQLite tables + `contextos serve`, React shell with page placeholders |
 | 01 LLM layer | done - Gemini + Groq over HTTP, JSON mode with one repair retry, rate limiter, disk cache, quota-aware fallback model |
 | 02 File organiser | done - scan, extract (PyMuPDF / OCR / docx / pptx), rules-then-LLM classify, dry-run plan, move + undo, folder watcher; Organize, Files, Settings pages |
-| 03 Deadlines & tasks (extracted deadlines, CRUD, reminders) | not started |
+| 03 Assignments & reminders | done - every assignment gets a task; Khushi asks for missing deadlines and confirms found ones; to-do steps (LLM or rules from the sheet's questions); mark done; desktop reminders N days before (default 5 and 3); Khushi's briefing |
 | 04 Weekly progress (study timer, chart, AI summary) | not started |
 | 05 Chat assistant + local actions | not started |
 | 06 Post-v1: RAG over notes, syllabus mind map, Spotify API, packaging | not started |
@@ -78,6 +78,21 @@ npm run build                                # dist/ is then served by `contexto
 - Deadlines need a deadline word on the line ("due", "submit", "last date")
   and must be in the future. `Task.due_at` is local wall-clock time
   (`NaiveDatetime`); every other timestamp is UTC.
+
+## How assignments work (Phase 03)
+
+- Every `DocType.assignment` document gets exactly one task
+  (`tasks/service.ensure_assignment_task`, also backfilled on startup). A
+  found deadline -> `suggested` with a date ("is this right?"); none found ->
+  `suggested` with no date ("when is it due?"). Answering either makes it
+  `todo`. "Not a deadline" -> `dismissed`, so rescans never re-suggest it.
+- Reminders only go to `todo` tasks, once per offset in `REMINDER_DAYS`
+  (tracked in `Task.reminded_days`, reset when the date changes). A laptop
+  that was off sends one catch-up, not every missed reminder.
+- Khushi's briefing (`agent/khushi.py`) is pure rules - it loads on every
+  page, so it must never spend LLM quota. To-do lists use the LLM only when
+  asked, and fall back to one step per question found in the sheet.
+- Any exception from the LLM (not just `LLMError`) must fall back to rules.
 
 ## Gemini free tier, as observed 2026-10-15
 
