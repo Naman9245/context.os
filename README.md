@@ -12,8 +12,10 @@ students who are drowning in PDFs, assignments and deadlines.
   checklist for each assignment, and reminds you 5 and 3 days before.
 - **Tracks your week.** It includes a study timer, a weekly progress chart,
   and an AI summary of where your time went.
-- **Does things for you.** "What's due this week?", "search normalisation in
-  DBMS", "play lofi on YouTube": the chat assistant runs on your own laptop.
+- **Talks to you.** Chat with Khushi from any page: "what's due this week?",
+  "open Spotify", "play lofi on YouTube", "search black holes on Wikipedia",
+  "I finished the DBMS assignment", "open my OS notes". Everyday commands work
+  instantly without any AI; study questions go to Gemini.
 
 It runs entirely on your machine. With `LLM_PROVIDER=none` nothing leaves it
 at all. With a free Gemini or Groq key, only a short snippet of each
@@ -51,6 +53,5 @@ PyMuPDF + Tesseract OCR · Gemini / Groq (free tier)
 
 ## Status
 
-The file organiser and assignments with reminders work end to end (phases 0-3).
-Khushi's chat (opening apps, web search) and voice are next - see the phase table
-in [CLAUDE.md](CLAUDE.md).
+The file organiser, assignments with reminders, and Khushi's chat work end to end.
+Voice (Khushi speaks and listens) is next - see the phase table in [CLAUDE.md](CLAUDE.md).

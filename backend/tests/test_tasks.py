@@ -259,7 +259,7 @@ def test_reminder_wording(session):
     t = _task(session, days=1)
     title, body = reminder_text(t, TODAY, "DBMS", 0, 4)
     assert title == "DBMS Assignment 2 is due tomorrow"
-    assert body.startswith("DBMS. Due Friday 16 October.")
+    assert body.startswith("DBMS. Due Friday 16 October 2026.")
     assert "start with the first one" in body
 
 
@@ -277,7 +277,7 @@ def test_briefing_mentions_what_matters(session):
     text = " ".join(line.text for line in b.lines)
     assert b.greeting == "Good morning! I'm Khushi."
     assert "OS Lab is overdue" in text
-    assert "Due this week: DBMS Assignment 2 (Sunday)" in text
+    assert "Due this week: DBMS Assignment 2 (Sun 18 Oct 2026)" in text
     assert "I couldn't find a deadline in DAA Assignment II. When is it due?" in text
     assert "I spotted 1 deadline in your files" in text
 

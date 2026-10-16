@@ -153,3 +153,14 @@ class ActivityEvent(SQLModel, table=True):
 class Setting(SQLModel, table=True):
     key: str = Field(primary_key=True)
     value: str
+
+
+class ChatMessage(SQLModel, table=True):
+    """One message in the conversation with Khushi."""
+
+    id: int | None = Field(default=None, primary_key=True)
+    role: str  # "user" | "khushi"
+    text: str
+    # Khushi's extras: actions taken, task/file ids to show as cards, suggestions.
+    payload: dict | None = Field(default=None, sa_column=Column(JSON))
+    created_at: datetime = Field(default_factory=utcnow, index=True)

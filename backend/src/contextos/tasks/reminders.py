@@ -14,6 +14,7 @@ from datetime import date, datetime
 from sqlmodel import Session, select
 
 from contextos.models import Subject, Task, TaskStatus, TaskStep
+from contextos.tasks.service import long_date
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ def reminder_text(task: Task, today: date, subject: str | None, done: int, total
                   ) -> tuple[str, str]:
     left = (task.due_at.date() - today).days
     title = f"{task.title} is due {_when(left)}"
-    parts = [f"Due {task.due_at.strftime('%A %d %B')}."]
+    parts = [f"Due {long_date(task.due_at)}."]
     if subject:
         parts.insert(0, f"{subject}.")
     if total:

@@ -13,6 +13,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from contextos.llm import LLMError, LLMProvider
+from contextos.tasks.service import long_date
 
 MAX_STEPS = 8
 _QUESTION = re.compile(
@@ -73,7 +74,7 @@ def generate_steps(
     prompt = (
         f"Assignment: {title}\n"
         f"Subject: {subject or 'unknown'}\n"
-        f"Due: {due_at.strftime('%A %d %B %Y') if due_at else 'not set'}\n"
+        f"Due: {long_date(due_at) if due_at else 'not set'}\n"
         f'Assignment text (start):\n"""\n{text[:snippet_chars]}\n"""'
     )
     try:

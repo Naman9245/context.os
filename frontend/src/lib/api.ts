@@ -150,3 +150,19 @@ export type Briefing = {
   lines: { text: string; link: string | null; tone: 'info' | 'warn' | 'good' }[]
   counts: Record<string, number>
 }
+
+export type ChatAction = { label: string; ok: boolean; url?: string | null }
+
+export type ChatMessage = {
+  id: number
+  role: 'user' | 'khushi'
+  text: string
+  created_at: string
+  actions: ChatAction[]
+  suggestions: string[]
+  by: string | null
+  tasks: Task[]
+  files: Doc[]
+}
+
+export type ChatExchange = { user: ChatMessage; reply: ChatMessage }

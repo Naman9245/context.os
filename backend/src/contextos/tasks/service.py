@@ -23,6 +23,16 @@ from contextos.models import (
 DUE_TIME = time(23, 59)
 
 
+def long_date(d: date) -> str:
+    """"Friday 23 October 2026" - always with the year, so nothing is ambiguous."""
+    return f"{d.strftime('%A')} {d.day} {d.strftime('%B %Y')}"
+
+
+def short_date(d: date) -> str:
+    """"Fri 23 Oct 2026"."""
+    return f"{d.strftime('%a')} {d.day} {d.strftime('%b %Y')}"
+
+
 def due_from_date(d: date) -> datetime:
     return datetime.combine(d, DUE_TIME)
 
