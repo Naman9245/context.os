@@ -141,3 +141,67 @@ def find_deadlines(
             title = default_title or line[:80]
             results.append(FoundDeadline(title=title, due=d, line=line[:200]))
     return results
+
+
+WEEKDAYS = {name: i for i, names in enumerate([
+    ("monday", "mon"), ("tuesday", "tue", "tues"), ("wednesday", "wed"),
+    ("thursday", "thu", "thur", "thurs"), ("friday", "fri"), ("saturday", "sat"),
+    ("sunday", "sun"),
+]) for name in names}
+
+_RELATIVE = re.compile(
+    r"\b(?:(?P<today>today|tonight)|(?P<dat>day after tomorrow)|(?P<tomorrow>tomorrow|tmrw|tmr)"
+    r"|in\s+(?P<n>\d{1,3}|a|one|two|three|four|five|six|seven)\s+(?P<unit>days?|weeks?)"
+    r"|(?P<nextweek>next\s+week)"
+    r"|(?:(?P<mod>this|next|coming)\s+)?(?P<wd>" + "|".join(sorted(WEEKDAYS, key=len, reverse=True))
+    + r")\b\.?)",
+    re.I,
+)
+_WORD_NUM = {"a": 1, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7}
+# Words that introduce a date and belong with it: "due Friday", "by tomorrow".
+_LEAD_IN = re.compile(r"\s*\b(?:is\s+)?(?:due|by|on|before|for|deadline|submit(?:ted)?\s+by)\s*$",
+                      re.I)
+
+
+def parse_when(text: str, today: date, order: str = "DMY") -> tuple[date | None, str]:
+    """A date said the way people say it, and the text without it.
+
+    "DBMS assignment due Friday" -> (next Friday, "DBMS assignment").
+    Handles today/tomorrow/weekdays/"in 3 days"/"next week" and written dates.
+    """
+    from datetime import timedelta
+
+    best: tuple[int, int, date] | None = None
+    m = _RELATIVE.search(text)
+    if m:
+        if m.group("today"):
+            d = today
+        elif m.group("dat"):
+            d = today + timedelta(days=2)
+        elif m.group("tomorrow"):
+            d = today + timedelta(days=1)
+        elif m.group("n"):
+            n = _WORD_NUM.get(m.group("n").lower()) or int(m.group("n"))
+            d = today + timedelta(days=n * (7 if m.group("unit").lower().startswith("week") else 1))
+        elif m.group("nextweek"):
+            d = today + timedelta(days=7)
+        else:
+            target = WEEKDAYS[m.group("wd").lower().rstrip(".")]
+            ahead = (target - today.weekday()) % 7 or 7  # "friday" on a Friday means next week
+            if (m.group("mod") or "").lower() == "next" and ahead < 7 and today.weekday() < target:
+                ahead += 7  # "next friday" said on Monday is the Friday after this one
+            d = today + timedelta(days=ahead)
+        best = (m.start(), m.end(), d)
+    if best is None:
+        for _kind, pattern in DATE_PATTERNS:
+            dm = pattern.search(text)
+            if dm:
+                found = find_dates(dm.group(0), today, order)
+                if found and (best is None or dm.start() < best[0]):
+                    best = (dm.start(), dm.end(), found[0])
+    if best is None:
+        return None, text.strip()
+    start, end, d = best
+    before = _LEAD_IN.sub("", text[:start])
+    rest = re.sub(r"\s+", " ", f"{before} {text[end:]}").strip(" ,.-")
+    return d, rest

@@ -28,7 +28,7 @@ Full plan: `~/.claude/plans/lets-make-the-context-os-quirky-hopcroft.md`.
 | 02 File organiser | done - scan, extract (PyMuPDF / OCR / docx / pptx), rules-then-LLM classify, dry-run plan, move + undo, folder watcher; Organize, Files, Settings pages |
 | 03 Assignments & reminders | done - every assignment gets a task; Khushi asks for missing deadlines and confirms found ones; to-do steps (LLM or rules from the sheet's questions); mark done; desktop reminders N days before (default 5 and 3); Khushi's briefing |
 | 04 Weekly progress (study timer, chart, AI summary) | not started |
-| 05 Chat assistant + local actions | not started |
+| 05 Khushi chat + local actions | done - rules-first intents (open apps/sites, play, search, what's due, add/finish tasks, find/open files, organise), LLM fallback picks one allowlisted action or answers study questions; chat history; Chat page + floating panel on every page |
 | 06 Post-v1: RAG over notes, syllabus mind map, Spotify API, packaging | not started |
 
 ## Commands
@@ -93,6 +93,22 @@ npm run build                                # dist/ is then served by `contexto
   page, so it must never spend LLM quota. To-do lists use the LLM only when
   asked, and fall back to one step per question found in the sheet.
 - Any exception from the LLM (not just `LLMError`) must fall back to rules.
+
+## How Khushi's chat works (Phase 05)
+
+- `agent/intents.py` rules run first: no quota, instant. Patterns keep the
+  user's casing (titles like "DBMS mini project") and must all be `re.I` -
+  a test enforces it. Add new everyday commands here, not to the LLM prompt.
+- Anything unmatched, or a vague query ("search me *this*"), goes to the LLM
+  with the last 6 messages and open tasks. It returns `ChatPlan` (reply +
+  at most one action) and `agent/tools.py` runs it. Khushi's text then
+  describes what the tool *actually* did, not what the model said.
+- Only `agent/actions.py` touches the OS: `launch_app` (allowlist in
+  `agent/apps.py`, web fallback when not installed), `open_url` (http/https/
+  spotify only), `open_path` (library + watched folders only). Tests patch
+  `_spawn`/`_open_with_system`; never launch real apps in tests or demos.
+- "Play" opens YouTube results / Spotify search - true autoplay needs the
+  Spotify Web API (Premium) or YouTube Data API key (post-v1).
 
 ## Gemini free tier, as observed 2026-10-15
 

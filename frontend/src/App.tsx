@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import Page, { ComingSoon } from './components/Page'
+import Chat from './pages/Chat'
 import Dashboard from './pages/Dashboard'
 import Files from './pages/Files'
 import Organize from './pages/Organize'
@@ -10,7 +11,6 @@ import Tasks from './pages/Tasks'
 // Pages that do not exist yet render a placeholder naming the phase that builds them.
 const PLACEHOLDERS = [
   { path: 'progress', title: 'Progress', subtitle: 'How your week went.', phase: 'Phase 4' },
-  { path: 'chat', title: 'Chat', subtitle: 'Ask ContextOS to do things.', phase: 'Phase 5' },
 ]
 
 export default function App() {
@@ -23,6 +23,7 @@ export default function App() {
           <Route path="files" element={<Files />} />
           <Route path="settings" element={<Settings />} />
           <Route path="tasks" element={<Tasks />} />
+          <Route path="chat" element={<Chat />} />
           {PLACEHOLDERS.map((p) => (
             <Route
               key={p.path}

@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from contextos.api import files, health, organize, subjects, tasks
+from contextos.api import chat, files, health, organize, subjects, tasks
 
 router = APIRouter()
 router.include_router(health.router)
@@ -10,3 +10,4 @@ router.include_router(organize.router)
 router.include_router(subjects.router)
 router.include_router(files.router)
 router.include_router(tasks.router)
+router.include_router(chat.router)

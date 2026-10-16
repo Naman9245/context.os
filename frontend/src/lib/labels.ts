@@ -16,7 +16,12 @@ export const typeLabel = (t: DocType) => DOC_TYPES.find((d) => d.value === t)?.l
 export function formatDue(iso: string | null): string {
   if (!iso) return 'no date'
   const d = new Date(iso)
-  return d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+  return d.toLocaleDateString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 export function timeAgo(iso: string): string {

@@ -12,6 +12,7 @@ from datetime import datetime
 from sqlmodel import Session, func, select
 
 from contextos.models import DocStatus, Document, Task, TaskStatus
+from contextos.tasks.service import short_date
 
 NAME = "Khushi"
 
@@ -48,7 +49,7 @@ def _day(dt: datetime, now: datetime) -> str:
         return "today"
     if left == 1:
         return "tomorrow"
-    return dt.strftime("%a %d %b") if left > 6 else dt.strftime("%A")
+    return short_date(dt)
 
 
 def _plural(n: int, word: str) -> str:
