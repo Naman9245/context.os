@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Khushi for Chrome",
+  "description": "Lets Khushi (ContextOS) reuse her own tab for each site, and open the first result when you say \"open it\".",
+  "version": "0.1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxseRlJQ2dOYQ/7qjCIO1rZN62OAW7UHbrVbk/07ZDxvN/Qj8n6LQtt5gS1QoL9IAF8CzL3iH6fXmDzOPM46SR7FnZTfxbmcfi11X/C1wIgXermot9EIsY3srJkhT+Gr0b3tgeLPQpQNnaPzuQzGHybhYfLAhQZicNwLNRAngBkw6ty3wv0gZcmT4wE62b3u3SAkZCVuqLpLWylNSibjP+cbQuyFujj2pD3AOERWGygBlNEyb7sObI0WG+iBLdHwaTYGPSRrlBxumJ49Acok08zAG1v7E00kPp1MwQ+zsAjAeuokbGnvOyli1Fw5vGp4Wg9Bq68XRBhgcDvDrg/WiHwIDAQAB",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*",
+    "https://www.youtube.com/*",
+    "https://www.google.com/*",
+    "https://*.wikipedia.org/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "minimum_chrome_version": "116"
+}

@@ -38,11 +38,14 @@ export const api = {
 export type Health = {
   status: string
   version: string
+  build: string | null
   llm_provider: 'none' | 'gemini' | 'groq'
   llm_model: string | null
   ocr_available: boolean
   watching: boolean
   notifications_available: boolean
+  browser_extension: boolean
+  extension_folder: string
   reminder_days: number[]
   library_root: string
   watch_dirs: string[]

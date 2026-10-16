@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import ChatPanel from './ChatPanel'
 import { KhushiAvatar } from './Khushi'
+import UpdateBanner from './UpdateBanner'
 
 const NAV = [
   { to: '/', label: 'Dashboard' },
@@ -19,6 +20,7 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
+      <UpdateBanner />
       <aside className="border-b border-zinc-200 p-4 md:w-56 md:border-r md:border-b-0 dark:border-zinc-800">
         <div className="mb-4 text-lg font-semibold tracking-tight">
           context<span className="text-accent">.os</span>

@@ -3,9 +3,10 @@
 Subclasses only implement `_request` (one HTTP call to one model). This base
 class owns everything a free tier needs around that call:
 
-- a rate limiter, so we stay under the requests-per-minute quota;
-- retries with backoff when the model says it is busy (429/5xx);
-- a fallback model when the main one stays busy or has been retired;
+- a rate limiter per model, so each stays under its requests-per-minute quota;
+- a chain of fallback models: free tiers are per model, and Google's models
+  take turns being overloaded, so a busy model is skipped at once for the next;
+- retries with backoff only on the last model in the chain;
 - an on-disk cache, so re-scanning a file never spends quota twice;
 - JSON mode validated against a Pydantic model, with one repair retry.
 """
@@ -15,8 +16,8 @@ from __future__ import annotations
 import json
 import re
 import time
-from collections.abc import Callable
-from typing import TypeVar
+from collections.abc import Callable, Sequence
+from typing import Literal, TypeVar
 
 from pydantic import BaseModel, ValidationError
 
@@ -53,7 +54,24 @@ QUOTA_WAIT_SECONDS = 30.0
 
 
 class LLMUnavailable(LLMError):
-    """Every model stayed busy through all retries."""
+    """No model could answer. `kind` says why, so the user can be told the truth:
+    "busy" (try again in a minute) or "quota" (used up for today)."""
+
+    def __init__(self, message: str, kind: Literal["busy", "quota"] = "busy"):
+        super().__init__(message)
+        self.kind = kind
+
+
+def model_chain(model: str, fallbacks: str | Sequence[str] | None) -> list[str]:
+    """[main, *fallbacks] without blanks or repeats. Fallbacks may be "a,b,c"."""
+    if isinstance(fallbacks, str):
+        fallbacks = fallbacks.split(",")
+    chain: list[str] = []
+    for m in [model, *(fallbacks or [])]:
+        m = m.strip()
+        if m and m not in chain:
+            chain.append(m)
+    return chain
 
 
 _FENCE = re.compile(r"^```(?:json)?\s*|\s*```$", re.MULTILINE)
@@ -70,26 +88,32 @@ class LLMProvider:
     def __init__(
         self,
         model: str,
-        fallback_model: str | None = None,
+        fallbacks: str | Sequence[str] | None = None,
         *,
-        limiter: RateLimiter | None = None,
+        requests_per_minute: int = 0,
         cache: LLMCache | None = None,
         max_retries: int = 2,
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,
-        cooldown_seconds: float = 120.0,
+        cooldown_seconds: float = 60.0,
     ):
-        self.model = model
-        self.fallback_model = fallback_model if fallback_model != model else None
-        self.limiter = limiter or RateLimiter(requests_per_minute=0)
+        self.models = model_chain(model, fallbacks)
+        self.model = self.models[0]
+        self.requests_per_minute = requests_per_minute
         self.cache = cache
         self.max_retries = max_retries
         self._sleep = sleep
         self._clock = clock
         self.cooldown_seconds = cooldown_seconds
-        # model -> clock time before which it is not worth asking. Saves paying for
-        # retries on every request while a model is busy or out of quota.
-        self._cooldown_until: dict[str, float] = {}
+        self._limiters: dict[str, RateLimiter] = {}
+        # model -> (clock time before which it is not worth asking, why). Saves
+        # paying for a busy or exhausted model on every request.
+        self._cooldown: dict[str, tuple[float, str]] = {}
+
+    def _limiter(self, model: str) -> RateLimiter:
+        if model not in self._limiters:
+            self._limiters[model] = RateLimiter(self.requests_per_minute, sleep=self._sleep)
+        return self._limiters[model]
 
     # -- subclass hook -----------------------------------------------------
 
@@ -144,33 +168,44 @@ class LLMProvider:
     # -- retry / fallback ----------------------------------------------------
 
     def _with_fallback(self, system: str, prompt: str, json_mode: bool) -> str:
-        models = [self.model] + ([self.fallback_model] if self.fallback_model else [])
         now = self._clock()
-        ready = [m for m in models if self._cooldown_until.get(m, 0.0) <= now]
+        cooling = {m: why for m, (until, why) in self._cooldown.items() if until > now}
+        ready = [m for m in self.models if m not in cooling]
         if not ready:
-            raise LLMUnavailable(f"{', '.join(models)} are out of quota or busy - try later")
+            # Busy models may have recovered - better to try them than to give up.
+            ready = [m for m in self.models if cooling.get(m) == "busy"]
+        if not ready:
+            raise LLMUnavailable(f"{', '.join(self.models)} are out of quota for now",
+                                 kind="quota")
         last: LLMError | None = None
-        for model in ready:
+        busy = False
+        for i, model in enumerate(ready):
+            is_last = i == len(ready) - 1
             try:
-                return self._with_retries(model, system, prompt, json_mode)
+                # A busy model is skipped at once while others remain: the next one is
+                # more likely to answer than a retry is. Only the last one is retried.
+                return self._with_retries(model, system, prompt, json_mode,
+                                          retries=self.max_retries if is_last else 0)
             except ModelUnavailable as e:
                 last = e
                 wait = e.retry_after if e.retry_after is not None else 24 * 3600
-                self._cooldown_until[model] = self._clock() + min(wait, 24 * 3600)
+                self._cooldown[model] = (self._clock() + min(wait, 24 * 3600), "quota")
             except TransientLLMError as e:
                 last = e
-                # Only worth skipping a busy model when there is another one to use.
-                if model == self.model and self.fallback_model:
-                    self._cooldown_until[model] = self._clock() + self.cooldown_seconds
-        raise LLMUnavailable(f"no model could answer ({', '.join(ready)}): {last}") from last
+                busy = True
+                if not is_last:
+                    self._cooldown[model] = (self._clock() + self.cooldown_seconds, "busy")
+        raise LLMUnavailable(f"no model could answer ({', '.join(ready)}): {last}",
+                             kind="busy" if busy else "quota") from last
 
-    def _with_retries(self, model: str, system: str, prompt: str, json_mode: bool) -> str:
-        for attempt in range(self.max_retries + 1):
-            self.limiter.acquire()
+    def _with_retries(self, model: str, system: str, prompt: str, json_mode: bool,
+                      retries: int) -> str:
+        for attempt in range(retries + 1):
+            self._limiter(model).acquire()
             try:
                 return self._request(model, system, prompt, json_mode)
             except TransientLLMError as e:
-                if attempt == self.max_retries:
+                if attempt == retries:
                     raise
                 backoff = 2.0 * (2**attempt)  # 2s, 4s, 8s...
                 self._sleep(min(e.retry_after or backoff, 30.0))

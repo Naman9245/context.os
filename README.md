@@ -15,7 +15,8 @@ students who are drowning in PDFs, assignments and deadlines.
 - **Talks to you.** Chat with Khushi from any page: "what's due this week?",
   "open Spotify", "play lofi on YouTube", "search black holes on Wikipedia",
   "I finished the DBMS assignment", "open my OS notes". Everyday commands work
-  instantly without any AI; study questions go to Gemini.
+  instantly without any AI; study questions go to Gemini. Khushi reads her
+  replies aloud, and in Chrome you can talk to her with the mic button.
 
 It runs entirely on your machine. With `LLM_PROVIDER=none` nothing leaves it
 at all. With a free Gemini or Groq key, only a short snippet of each
@@ -53,5 +54,5 @@ PyMuPDF + Tesseract OCR · Gemini / Groq (free tier)
 
 ## Status
 
-The file organiser, assignments with reminders, and Khushi's chat work end to end.
-Voice (Khushi speaks and listens) is next - see the phase table in [CLAUDE.md](CLAUDE.md).
+The file organiser, assignments with reminders, and Khushi's chat and voice work end
+to end. Next: start on login, a weekly progress page - see [CLAUDE.md](CLAUDE.md).

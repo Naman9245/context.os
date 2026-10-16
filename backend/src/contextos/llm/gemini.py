@@ -46,14 +46,14 @@ class GeminiProvider(LLMProvider):
         self,
         api_key: str,
         model: str,
-        fallback_model: str | None = None,
+        fallbacks: str | list[str] | None = None,
         *,
         client: httpx.Client | None = None,
         timeout: float = 60.0,
         thinking_level: str | None = "minimal",
         **kwargs,
     ):
-        super().__init__(model, fallback_model, **kwargs)
+        super().__init__(model, fallbacks, **kwargs)
         if not api_key:
             raise LLMError("GEMINI_API_KEY is not set")
         self._client = client or httpx.Client(timeout=timeout)

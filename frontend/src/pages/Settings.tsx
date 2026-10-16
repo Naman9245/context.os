@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import Page from '../components/Page'
+import ExtensionSettings from '../components/ExtensionSettings'
+import VoiceSettings from '../components/VoiceSettings'
 import { Badge, Button, Card, Notice, SubjectDot, inputClass } from '../components/ui'
 import { api, type Health, type Subject } from '../lib/api'
 
@@ -158,6 +160,10 @@ export default function Settings() {
             </Card>
           )}
         </section>
+
+        <VoiceSettings />
+
+        {health && <ExtensionSettings initial={health} />}
 
         {health && (
           <section>
