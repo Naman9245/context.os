@@ -1,0 +1,15 @@
+[
+  ["https://www.youtube.com/results?search_query=carryminati", "youtube.com"],
+  ["https://m.youtube.com/watch?v=abc", "youtube.com"],
+  ["https://youtu.be/abc", "youtube.com"],
+  ["https://en.wikipedia.org/wiki/Special:Search?search=black+holes", "wikipedia.org"],
+  ["https://en.m.wikipedia.org/wiki/Alan_Turing", "wikipedia.org"],
+  ["https://www.google.com/search?q=games", "google.com"],
+  ["https://www.google.com/maps/search/pizza", "google.com"],
+  ["https://mail.google.com/mail/u/0/", "google.com"],
+  ["https://www.amazon.in/s?k=books", "amazon.in"],
+  ["https://vtu.ac.in/en/results/", "vtu.ac.in"],
+  ["https://www.bbc.co.uk/news", "bbc.co.uk"],
+  ["https://open.spotify.com/search/lofi", "spotify.com"],
+  ["not a url", ""]
+]

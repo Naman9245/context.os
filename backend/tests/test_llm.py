@@ -48,7 +48,7 @@ def test_gemini_sends_key_in_header_not_url():
     assert "test-key" not in seen["url"]
 
 
-def test_busy_model_retries_then_falls_back():
+def test_busy_model_is_skipped_at_once_for_the_next():
     def handler(request):
         if "main-model" in request.url.path:
             return httpx.Response(503, json={"error": {"status": "UNAVAILABLE"}})
@@ -56,7 +56,29 @@ def test_busy_model_retries_then_falls_back():
 
     p, asked = make_gemini(handler, max_retries=2)
     assert p.complete("hello") == "from backup"
-    assert asked == ["main-model"] * 3 + ["backup-model"]
+    assert asked == ["main-model", "backup-model"]  # no 20 seconds of retrying a busy model
+
+
+def test_only_the_last_model_is_retried():
+    replies = iter([httpx.Response(503), httpx.Response(503), gemini_reply("finally")])
+    p, asked = make_gemini(lambda r: next(replies), max_retries=2)
+    assert p.complete("hello") == "finally"
+    assert asked == ["main-model", "backup-model", "backup-model"]
+
+
+def test_a_chain_of_fallbacks_is_tried_in_order():
+    asked: list[str] = []
+
+    def handler(request):
+        model = request.url.path.split("/")[-1].split(":")[0]
+        asked.append(model)
+        return gemini_reply(model) if model == "third" else httpx.Response(503)
+
+    p = GeminiProvider("k", "main", "second, third ,main,", sleep=lambda s: None,
+                       client=httpx.Client(transport=httpx.MockTransport(handler)))
+    assert p.models == ["main", "second", "third"]  # blanks and repeats dropped
+    assert p.complete("q") == "third"
+    assert asked == ["main", "second", "third"]
 
 
 def quota_429(seconds: str) -> httpx.Response:
@@ -90,19 +112,27 @@ def test_daily_quota_goes_straight_to_fallback_and_stays_away():
 
 def test_short_429_is_retried_like_busy():
     replies = iter([quota_429("2s"), gemini_reply("ok")])
-    p, asked = make_gemini(lambda r: next(replies))
+    asked: list[str] = []
+
+    def handler(request):
+        asked.append("only-model")
+        return next(replies)
+
+    p = GeminiProvider("k", "only-model", sleep=lambda s: None,
+                       client=httpx.Client(transport=httpx.MockTransport(handler)))
     assert p.complete("q") == "ok"
-    assert asked == ["main-model", "main-model"]
+    assert asked == ["only-model", "only-model"]
 
 
 def test_when_every_model_is_out_of_quota_no_requests_are_wasted():
     p, asked = make_gemini(lambda r: quota_429("50000s"))
-    with pytest.raises(LLMUnavailable):
+    with pytest.raises(LLMUnavailable) as first:
         p.complete("one")
+    assert first.value.kind == "quota"
     asked.clear()
-    with pytest.raises(LLMUnavailable, match="out of quota"):
+    with pytest.raises(LLMUnavailable, match="out of quota") as second:
         p.complete("two")
-    assert asked == []
+    assert asked == [] and second.value.kind == "quota"
 
 
 def test_thinking_level_is_sent_and_dropped_if_rejected():
@@ -123,11 +153,22 @@ def test_thinking_level_is_sent_and_dropped_if_rejected():
     assert "thinkingConfig" not in bodies[2]["generationConfig"]  # remembered
 
 
-def test_all_models_busy_raises_unavailable():
-    p, asked = make_gemini(lambda r: httpx.Response(429), max_retries=1)
-    with pytest.raises(LLMUnavailable):
+def test_all_models_busy_raises_unavailable_saying_busy():
+    p, asked = make_gemini(lambda r: httpx.Response(503), max_retries=1)
+    with pytest.raises(LLMUnavailable) as e:
         p.complete("hello")
-    assert len(asked) == 4
+    assert e.value.kind == "busy"  # "try again in a minute", not "quota used up"
+    assert asked == ["main-model", "backup-model", "backup-model"]
+
+
+def test_busy_models_are_tried_again_rather_than_giving_up():
+    p, asked = make_gemini(lambda r: httpx.Response(503), max_retries=0)
+    with pytest.raises(LLMUnavailable):
+        p.complete("one")
+    asked.clear()
+    with pytest.raises(LLMUnavailable):
+        p.complete("two")  # main is cooling down, but backup is still worth a try
+    assert asked == ["backup-model"]
 
 
 def test_busy_main_model_is_skipped_for_a_while():
@@ -148,7 +189,7 @@ def test_busy_main_model_is_skipped_for_a_while():
                        clock=lambda: now[0], cooldown_seconds=120,
                        client=httpx.Client(transport=httpx.MockTransport(record)))
     p.complete("one")
-    assert asked == ["main-model", "main-model", "backup-model"]
+    assert asked == ["main-model", "backup-model"]
     asked.clear()
     p.complete("two")                      # within the cooldown: no time wasted on main
     assert asked == ["backup-model"]

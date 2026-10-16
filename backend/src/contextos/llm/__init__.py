@@ -32,10 +32,9 @@ def build_llm(settings: Settings) -> LLMProvider | None:
 
     # Imported lazily: httpx lives in the `llm` extra.
     from contextos.llm.cache import LLMCache
-    from contextos.llm.ratelimit import RateLimiter
 
     common = dict(
-        limiter=RateLimiter(settings.llm_requests_per_minute),
+        requests_per_minute=settings.llm_requests_per_minute,
         cache=LLMCache(settings.llm_cache_dir),
         max_retries=settings.llm_max_retries,
         timeout=settings.llm_timeout_seconds,
@@ -46,7 +45,7 @@ def build_llm(settings: Settings) -> LLMProvider | None:
         return GeminiProvider(
             settings.gemini_api_key,
             settings.gemini_model,
-            settings.gemini_fallback_model or None,
+            settings.gemini_fallback_model,
             thinking_level=settings.gemini_thinking_level,
             **common,
         )
@@ -56,7 +55,7 @@ def build_llm(settings: Settings) -> LLMProvider | None:
         return GroqProvider(
             settings.groq_api_key,
             settings.groq_model,
-            settings.groq_fallback_model or None,
+            settings.groq_fallback_model,
             **common,
         )
     raise LLMError(f"unknown LLM_PROVIDER {settings.llm_provider!r}")

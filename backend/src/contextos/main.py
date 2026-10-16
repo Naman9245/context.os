@@ -10,22 +10,19 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from pathlib import Path
-from urllib.parse import urlsplit
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from contextos import __version__
+from contextos import __version__, frontend
 from contextos.api import router as api_router
 from contextos.config import get_settings
 from contextos.db import init_db
+from contextos.security import LOCAL_HOSTS, hostname
 
 log = logging.getLogger(__name__)
 
-FRONTEND_DIST = Path(__file__).resolve().parents[3] / "frontend" / "dist"
-LOCAL_HOSTS = {"127.0.0.1", "localhost", "::1"}
 
 
 def _start_reminders(settings) -> object | None:
@@ -80,10 +77,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         app.state.reminders.stop()
 
 
-def _hostname(value: str) -> str:
-    return (urlsplit(value if "//" in value else f"//{value}").hostname or "").lower()
-
-
 def create_app() -> FastAPI:
     app = FastAPI(title="ContextOS", version=__version__, lifespan=lifespan)
 
@@ -94,25 +87,29 @@ def create_app() -> FastAPI:
         - Host check: blocks DNS-rebinding (a website resolving its name to 127.0.0.1).
         - Origin check: blocks other websites' pages from POSTing to localhost.
         """
-        if _hostname(request.headers.get("host", "")) not in LOCAL_HOSTS:
+        if hostname(request.headers.get("host", "")) not in LOCAL_HOSTS:
             return JSONResponse({"detail": "ContextOS only answers on localhost"}, 403)
         origin = request.headers.get("origin")
-        if origin and _hostname(origin) not in LOCAL_HOSTS:
+        if origin and hostname(origin) not in LOCAL_HOSTS:
             return JSONResponse({"detail": "cross-site request refused"}, 403)
         return await call_next(request)
 
     app.include_router(api_router, prefix="/api")
 
-    if FRONTEND_DIST.is_dir():
-        app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+    dist = frontend.FRONTEND_DIST
+    if dist.is_dir():
+        # Bundles have content hashes in their names, so they can be cached forever.
+        app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
 
         @app.get("/{path:path}", include_in_schema=False)
         async def spa(path: str) -> FileResponse:
             # Client-side routes (/tasks, /organize, ...) all load index.html.
-            candidate = (FRONTEND_DIST / path).resolve()
-            if path and candidate.is_file() and candidate.is_relative_to(FRONTEND_DIST):
+            candidate = (dist / path).resolve()
+            if path and candidate.is_file() and candidate.is_relative_to(dist):
                 return FileResponse(candidate)
-            return FileResponse(FRONTEND_DIST / "index.html")
+            # index.html must never be served stale: it names the current bundles,
+            # and the old ones are deleted by every rebuild.
+            return FileResponse(dist / "index.html", headers={"Cache-Control": "no-cache"})
 
     return app
 

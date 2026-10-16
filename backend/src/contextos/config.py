@@ -48,8 +48,9 @@ class Settings(BaseSettings):
     llm_provider: LLMProviderName = "none"
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.5-flash"
-    # Used when the main model is overloaded or rate-limited.
-    gemini_fallback_model: str = "gemini-3.1-flash-lite"
+    # Tried in order when the main model is busy or out of quota (comma-separated).
+    # Free-tier quotas are per model, so each one adds a day's worth of requests.
+    gemini_fallback_model: str = "gemini-3.5-flash-lite,gemini-flash-lite-latest"
     # How hard Gemini thinks before answering: minimal | low | medium | high, or empty for
     # the model's default. Sorting files needs little, and "minimal" is about twice as fast.
     gemini_thinking_level: str = "minimal"
