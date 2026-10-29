@@ -55,4 +55,5 @@ PyMuPDF + Tesseract OCR · Gemini / Groq (free tier)
 ## Status
 
 The file organiser, assignments with reminders, and Khushi's chat and voice work end
-to end. Next: start on login, a weekly progress page - see [CLAUDE.md](CLAUDE.md).
+to end. Next: a weekly progress page, then starting with the laptop - see the
+[plan](docs/PLAN.md). How it is built: [architecture](docs/ARCHITECTURE.md).

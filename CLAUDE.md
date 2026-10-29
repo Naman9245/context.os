@@ -17,7 +17,8 @@ without the LLM; the free-tier quota is saved for real understanding work.
 
 `AGENTS.md` is a symlink to this file. Edit this one.
 
-Full plan: `~/.claude/plans/lets-make-the-context-os-quirky-hopcroft.md`.
+Full plan: [docs/PLAN.md](docs/PLAN.md). How the code fits together:
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Keep both in step with the code.
 
 ## Where things stand
 
@@ -27,10 +28,10 @@ Full plan: `~/.claude/plans/lets-make-the-context-os-quirky-hopcroft.md`.
 | 01 LLM layer | done - Gemini + Groq over HTTP, JSON mode with one repair retry, rate limiter, disk cache, quota-aware fallback model |
 | 02 File organiser | done - scan, extract (PyMuPDF / OCR / docx / pptx), rules-then-LLM classify, dry-run plan, move + undo, folder watcher; Organize, Files, Settings pages |
 | 03 Assignments & reminders | done - every assignment gets a task; Khushi asks for missing deadlines and confirms found ones; to-do steps (LLM or rules from the sheet's questions); mark done; desktop reminders N days before (default 5 and 3); Khushi's briefing |
-| 04 Weekly progress (study timer, chart, AI summary) | not started |
+| 04 Weekly progress (study timer, chart, AI summary) | next - designed in docs/PLAN.md |
 | 05 Khushi chat + local actions | done - rules-first intents (open apps/sites, play, search, what's due, add/finish tasks, find/open files, organise), LLM fallback picks one allowlisted action or answers study questions; chat history; Chat page + floating panel on every page |
 | 05b Voice | done - Khushi reads replies (and their task/file cards) aloud via the browser's speechSynthesis; mic button uses Chrome's SpeechRecognition (en-IN default); voice, speed, language in Settings, stored per browser |
-| 06 Post-v1: RAG over notes, syllabus mind map, Spotify API, packaging | not started |
+| 04b, 06-09 Post-v1: always on, notes search and RAG, exam mode, more inboxes, packaging | planned - see docs/PLAN.md |
 
 ## Commands
 
@@ -86,17 +87,18 @@ node --test browser-extension/*.test.mjs     # tab logic; Load unpacked to try i
 
 ## How assignments work (Phase 03)
 
-- Every `DocType.assignment` document gets exactly one task
-  (`tasks/service.ensure_assignment_task`, also backfilled on startup). A
+- Every `DocType.assignment` document gets at least one task
+  (`tasks/service.ensure_assignment_task`, also backfilled on startup). Each
   found deadline -> `suggested` with a date ("is this right?"); none found ->
   `suggested` with no date ("when is it due?"). Answering either makes it
   `todo`. "Not a deadline" -> `dismissed`, so rescans never re-suggest it.
 - Reminders only go to `todo` tasks, once per offset in `REMINDER_DAYS`
   (tracked in `Task.reminded_days`, reset when the date changes). A laptop
   that was off sends one catch-up, not every missed reminder.
-- Khushi's briefing (`agent/khushi.py`) is pure rules - it loads on every
-  page, so it must never spend LLM quota. To-do lists use the LLM only when
-  asked, and fall back to one step per question found in the sheet.
+- Khushi's briefing (`agent/khushi.py`) is pure rules - it loads with the
+  Dashboard and Assignments pages, so it must never spend LLM quota. To-do
+  lists use the LLM only when asked, and fall back to one step per question
+  found in the sheet.
 - Any exception from the LLM (not just `LLMError`) must fall back to rules.
 
 ## How Khushi's chat works (Phase 05)
@@ -105,9 +107,9 @@ node --test browser-extension/*.test.mjs     # tab logic; Load unpacked to try i
   user's casing (titles like "DBMS mini project") and must all be `re.I` -
   a test enforces it. Add new everyday commands here, not to the LLM prompt.
 - Anything unmatched, or a vague query ("search me *this*"), goes to the LLM
-  with the last 6 messages and open tasks. It returns `ChatPlan` (reply +
-  at most one action) and `agent/tools.py` runs it. Khushi's text then
-  describes what the tool *actually* did, not what the model said.
+  with the last 10 messages and up to 10 open tasks. It returns `ChatPlan`
+  (reply + at most one action) and `agent/tools.py` runs it. Khushi's text
+  then describes what the tool *actually* did, not what the model said.
 - On Linux every launch goes through `systemd-run --user` (the desktop
   session), not a child process. A shell started inside the Claude app has
   `NoNewPrivs: 1`; children inherit it and **snap apps (VS Code, Spotify) die
