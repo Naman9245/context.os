@@ -6,9 +6,11 @@ not installed falls back to its web version when it has one.
 
 from __future__ import annotations
 
+import os
 import re
 import shutil
 from dataclasses import dataclass
+from pathlib import Path
 from urllib.parse import quote, quote_plus
 
 
@@ -17,7 +19,9 @@ class App:
     key: str
     name: str
     aliases: tuple[str, ...]
-    commands: tuple[str, ...]  # executables to try, in order
+    # Executables to try, in order. Windows names end in .exe so they never match
+    # a Linux program (plain `calc` there is a console calculator with no window).
+    commands: tuple[str, ...]
     web: str | None = None     # used when the app is not installed
 
 
@@ -25,16 +29,16 @@ APPS = [
     App("spotify", "Spotify", ("spotify",), ("spotify",), "https://open.spotify.com"),
     App("discord", "Discord", ("discord",), ("discord",), "https://discord.com/app"),
     App("chrome", "Google Chrome", ("chrome", "google chrome", "browser", "the browser"),
-        ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser")),
-    App("firefox", "Firefox", ("firefox", "mozilla"), ("firefox",)),
+        ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome.exe")),
+    App("firefox", "Firefox", ("firefox", "mozilla"), ("firefox", "firefox.exe")),
     App("vscode", "VS Code", ("vs code", "vscode", "visual studio code", "code editor"),
         ("code",), "https://vscode.dev"),
-    App("files", "Files", ("files", "file manager", "nautilus", "file explorer"),
-        ("nautilus", "dolphin", "thunar", "nemo")),
+    App("files", "Files", ("files", "file manager", "nautilus", "file explorer", "explorer"),
+        ("nautilus", "dolphin", "thunar", "nemo", "explorer.exe")),
     App("calculator", "Calculator", ("calculator", "calc"),
-        ("gnome-calculator", "kcalc", "galculator")),
-    App("terminal", "Terminal", ("terminal",),
-        ("gnome-terminal", "konsole", "xfce4-terminal", "x-terminal-emulator")),
+        ("gnome-calculator", "kcalc", "galculator", "calc.exe")),
+    App("terminal", "Terminal", ("terminal", "windows terminal"),
+        ("gnome-terminal", "konsole", "xfce4-terminal", "x-terminal-emulator", "wt.exe")),
     App("telegram", "Telegram", ("telegram",), ("telegram-desktop", "telegram"),
         "https://web.telegram.org"),
     App("whatsapp", "WhatsApp", ("whatsapp", "whats app"), (), "https://web.whatsapp.com"),
@@ -107,7 +111,33 @@ def find_app(name: str) -> App | None:
 def installed_command(app: App) -> str | None:
     for cmd in app.commands:
         path = shutil.which(cmd)
+        if not path and cmd.endswith(".exe"):
+            path = _app_path(cmd)
         if path:
+            return path
+    return None
+
+
+# Where Windows installers register their programs. Chrome and Firefox install
+# outside PATH, so this is the only way to find them there.
+APP_PATHS = r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths"
+
+
+def _app_path(exe: str) -> str | None:
+    """Where Windows' App Paths registry says `exe` is - per-user installs first."""
+    try:
+        import winreg
+    except ImportError:  # not Windows
+        return None
+    for hive in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
+        try:
+            value = winreg.QueryValue(hive, rf"{APP_PATHS}\{exe}")
+        except OSError:
+            continue
+        path = os.path.expandvars(value.strip('"'))  # some installers quote it
+        # A missing file was left behind by an uninstall. Store apps point into the
+        # locked WindowsApps folder; they start through their alias on PATH instead.
+        if os.path.isfile(path) and "windowsapps" not in (p.lower() for p in Path(path).parts):
             return path
     return None
 

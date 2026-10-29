@@ -114,6 +114,11 @@ node --test browser-extension/*.test.mjs     # tab logic; Load unpacked to try i
   with "snap-confine ... cannot continue"**. The session also gives apps a
   clean environment (no leaked `CHROME_DESKTOP`). A launch that fails within
   `SETTLE_SECONDS` raises `LaunchFailed`, and Khushi says so - never "Opened".
+- On Windows, apps are found by their `.exe` names (never a Linux program's):
+  on PATH, else in the App Paths registry (`apps._app_path`), which is where
+  Chrome and Firefox register - they install outside PATH. Store apps (Windows
+  Terminal) start through their alias on PATH, never from the locked
+  WindowsApps folder.
 - Only `agent/actions.py` touches the OS: `launch_app` (allowlist in
   `agent/apps.py`, web fallback when not installed), `open_url` (http/https/
   spotify only), `open_path` (library + watched folders only). Tests patch

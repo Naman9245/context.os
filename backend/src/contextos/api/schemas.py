@@ -24,7 +24,8 @@ class DocumentOut(BaseModel):
     filename: str
     current_path: str
     planned_path: str | None
-    # planned_path relative to the library root, for display.
+    # planned_path relative to the library root, for display. Always "/"-separated,
+    # even on Windows: the Organize page splits it into Semester / Subject / Type.
     destination: str | None
     doc_type: DocType
     subject_id: int | None
@@ -45,7 +46,7 @@ def _relative(path: str | None, root: Path) -> str | None:
     if not path:
         return None
     try:
-        return str(Path(path).relative_to(root))
+        return Path(path).relative_to(root).as_posix()
     except ValueError:
         return path
 
