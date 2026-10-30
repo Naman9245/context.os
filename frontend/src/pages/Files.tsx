@@ -83,7 +83,7 @@ export default function Files() {
         {files !== null && files.length === 0 && (
           <Card className="py-10 text-center">
             <p className="font-medium">Your library is empty.</p>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-stone-500">
               Approve some moves on the{' '}
               <Link to="/organize" className="text-accent hover:underline">
                 Organize
@@ -95,26 +95,32 @@ export default function Files() {
 
         {groups.map(([sem, bySubject]) => (
           <section key={sem}>
-            <h2 className="mb-2 text-sm font-semibold text-zinc-500">{sem}</h2>
+            <h2 className="mb-3 font-display text-xl font-extrabold tracking-tight">{sem}</h2>
             <div className="space-y-3">
               {[...bySubject.entries()].map(([subj, docs]) => (
-                <Card key={subj} className="p-0">
-                  <div className="flex items-center gap-2 border-b border-zinc-200 px-4 py-2 text-sm font-medium dark:border-zinc-800">
+                <Card key={subj} pad={false}>
+                  {/* Each subject's header is tinted in its colour, like a binder divider. */}
+                  <div
+                    className="flex items-center gap-2.5 rounded-t-[27px] px-5 pt-4 pb-3"
+                    style={{ background: `${docs[0].subject_color ?? '#a1a1aa'}26` }}
+                  >
                     <SubjectDot color={docs[0].subject_color} />
-                    {subj}
-                    <span className="font-normal text-zinc-500">· {docs.length}</span>
+                    <span className="font-display text-lg font-bold">{subj}</span>
+                    <span className="text-sm text-stone-500">
+                      {docs.length} {docs.length === 1 ? 'file' : 'files'}
+                    </span>
                   </div>
-                  <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  <ul className="divide-y divide-stone-100 dark:divide-stone-800">
                     {docs.map((d) => (
                       <li key={d.id}>
                         <button
                           onClick={() => open(d)}
-                          className="flex w-full items-center gap-3 px-4 py-2 text-left text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                          className="flex w-full items-center gap-3 px-5 py-2.5 text-left text-sm hover:bg-stone-100 dark:hover:bg-stone-800/50"
                           title={d.current_path}
                         >
                           <Badge>{typeLabel(d.doc_type)}</Badge>
                           <span className="min-w-0 flex-1 truncate">{d.title ?? d.filename}</span>
-                          <span className="hidden truncate font-mono text-xs text-zinc-400 sm:block">
+                          <span className="hidden truncate font-mono text-xs text-stone-400 sm:block">
                             {d.filename}
                           </span>
                         </button>

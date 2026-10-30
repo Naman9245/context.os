@@ -85,7 +85,7 @@ flowchart LR
 | Reading files | PyMuPDF, Tesseract through pytesseract, python-docx, python-pptx | PDF text and page images, OCR for scans and photos, Office files |
 | Background work | watchdog, Python threads | folder watching, scans, reminder checks |
 | Notifications | `notify-send` (Linux), `osascript` (macOS), plyer (Windows) | Khushi's reminders |
-| UI | React 19, React Router 7, Vite 8, TypeScript 6, Tailwind CSS 4 | single-page app; Recharts 3 is installed for the Phase 04 charts |
+| UI | React 19, React Router 7, Vite 8, TypeScript 6, Tailwind CSS 4; Gabarito and Figtree fonts bundled through fontsource | single-page app styled by the design system in [DESIGN.md](DESIGN.md); Recharts 3 is installed for the Phase 04 charts |
 | Voice | the browser's `speechSynthesis` and `webkitSpeechRecognition` | no downloads, no server work |
 | Chrome extension | Manifest V3 service worker (Chrome 116+) | reuses one tab per site, opens the first result |
 | Quality | pytest, ruff, vitest, oxlint, tsc, `node --test` | one command per part, all must pass |
@@ -133,7 +133,7 @@ context.os/
 │   ├── components/              Layout, ChatPanel, Khushi, UpdateBanner, VoiceSettings, ExtensionSettings, ...
 │   └── lib/                     api.ts (fetch wrapper and types), voice.ts, labels.ts
 ├── browser-extension/           Khushi for Chrome: manifest.json, background.js, khushi.js, tests
-├── docs/                        ARCHITECTURE.md (this file), PLAN.md
+├── docs/                        ARCHITECTURE.md (this file), PLAN.md, DESIGN.md
 ├── CLAUDE.md                    working rules for contributors (AGENTS.md points to it)
 └── .env.example                 the common settings, documented
 ```
@@ -424,13 +424,17 @@ it is never sent by itself. Preferences live in the browser's localStorage.
 
 | Route | Page | What it does |
 |---|---|---|
-| `/` | Dashboard | Khushi's briefing; counts of files to organise, the library and open assignments; what is coming up |
+| `/` | Dashboard | the day as a stack of colour bands (greeting, Khushi's briefing, files to organise, the library); assignment counts; what is coming up |
 | `/organize` | Organize | scan, review and edit the plan, approve, skip, undo recent batches |
 | `/files` | Files | the organised library by semester; open a file |
 | `/tasks` | Assignments | Khushi's questions, assignments soonest first, to-do lists |
 | `/progress` | placeholder | "Phase 4" |
 | `/chat` | Chat | the full conversation |
 | `/settings` | Settings | subjects, setup status, voice, the extension, a test notification |
+
+The look (colour tokens, fonts, shapes, the shared components) is described in
+[DESIGN.md](DESIGN.md); the tokens are in `src/index.css`. Wide screens get a
+dark navigation rail on the left, phones a bar along the bottom.
 
 The floating Khushi panel is on every page. `lib/api.ts` is a small typed
 `fetch` wrapper; in development Vite proxies `/api` to `127.0.0.1:8000`. In a
@@ -559,7 +563,7 @@ Every setting has a default; `.env.example` documents the common ones.
 |---|---|---|
 | Backend | `python -m pytest -q` | 282 (one skips when Tesseract is not installed) |
 | Backend lint | `ruff check src tests` | |
-| Frontend | `npm test` (vitest) | 25, for the pure voice helpers |
+| Frontend | `npm test` (vitest) | 31, for the pure voice and date helpers |
 | Frontend types and build | `npm run build` (tsc, then Vite) | |
 | Frontend lint | `npm run lint` (oxlint) | |
 | Extension | `node --test browser-extension/*.test.mjs` (from the repo root) | 13 |

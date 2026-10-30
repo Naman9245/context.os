@@ -66,7 +66,7 @@ export default function Tasks() {
 
         {questions.length > 0 && (
           <section className="space-y-2">
-            <h2 className="text-sm font-semibold text-zinc-500">Khushi has a few questions</h2>
+            <h2 className="text-sm font-semibold text-stone-500">Khushi has a few questions</h2>
             {questions.map((t) => (
               <QuestionCard
                 key={t.id}
@@ -83,7 +83,7 @@ export default function Tasks() {
             {adding ? 'Close' : '+ Add assignment'}
           </Button>
           {tasks && (
-            <span className="text-sm text-zinc-500">
+            <span className="text-sm text-stone-500">
               {todo.length} to do · {done.length} finished
             </span>
           )}
@@ -102,7 +102,7 @@ export default function Tasks() {
         {tasks && todo.length === 0 && questions.length === 0 && (
           <Card className="py-10 text-center">
             <p className="font-medium">No assignments yet.</p>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-stone-500">
               When you scan your files, Khushi adds every assignment she finds here.
             </p>
           </Card>
@@ -114,7 +114,7 @@ export default function Tasks() {
           return (
             <section key={g.key} className="space-y-2">
               <h2
-                className={`text-sm font-semibold ${g.key === 'overdue' ? 'text-red-600' : 'text-zinc-500'}`}
+                className={`text-sm font-semibold ${g.key === 'overdue' ? 'text-red-600' : 'text-stone-500'}`}
               >
                 {g.label}
               </h2>
@@ -128,18 +128,18 @@ export default function Tasks() {
         {done.length > 0 && (
           <section>
             <button
-              className="text-sm text-zinc-500 hover:underline"
+              className="text-sm text-stone-500 hover:underline"
               onClick={() => setShowDone((s) => !s)}
             >
               {showDone ? 'Hide' : 'Show'} finished ({done.length})
             </button>
             {showDone && (
-              <Card className="mt-2 p-0">
-                <ul className="divide-y divide-zinc-100 text-sm dark:divide-zinc-800">
+              <Card pad={false} className="mt-2">
+                <ul className="divide-y divide-stone-100 text-sm dark:divide-stone-800">
                   {done.map((t) => (
                     <li key={t.id} className="flex items-center gap-3 px-4 py-2">
                       <span className="text-emerald-600">✓</span>
-                      <span className="min-w-0 flex-1 truncate text-zinc-500 line-through">
+                      <span className="min-w-0 flex-1 truncate text-stone-500 line-through">
                         {t.title}
                       </span>
                       <Button
@@ -189,7 +189,7 @@ function QuestionCard({
       onAnswered()
     })
   const from = task.document_name ? (
-    <span className="font-mono text-xs text-zinc-500">{task.document_name}</span>
+    <span className="font-mono text-xs text-stone-500">{task.document_name}</span>
   ) : null
 
   return (
@@ -295,26 +295,26 @@ function TaskCard({
   }
 
   return (
-    <Card className="p-0">
+    <Card pad={false}>
       <div className="flex items-start gap-3 px-4 py-3">
         <button
           title="Mark as finished"
           aria-label={`Mark ${task.title} as finished`}
           onClick={finish}
-          className="mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 border-zinc-300 hover:border-emerald-500 hover:bg-emerald-50 dark:border-zinc-600 dark:hover:bg-emerald-950"
+          className="mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 border-stone-300 hover:border-emerald-500 hover:bg-emerald-50 dark:border-stone-600 dark:hover:bg-emerald-950"
         />
         <button className="min-w-0 flex-1 text-left" onClick={() => setOpen((o) => !o)}>
           <div className="flex flex-wrap items-center gap-x-2">
             <SubjectDot color={task.subject_color} />
             <span className="font-medium">{task.title}</span>
-            {task.subject && <span className="text-xs text-zinc-500">{task.subject}</span>}
+            {task.subject && <span className="text-xs text-stone-500">{task.subject}</span>}
           </div>
-          <div className={`mt-0.5 text-xs ${late ? 'text-red-600' : 'text-zinc-500'}`}>
+          <div className={`mt-0.5 text-xs ${late ? 'text-red-600' : 'text-stone-500'}`}>
             {task.due_at ? `${formatDue(task.due_at)} · ${dueIn(task.days_left)}` : 'No deadline'}
             {total > 0 && ` · ${doneSteps}/${total} steps`}
           </div>
           {total > 0 && (
-            <div className="mt-2 h-1 overflow-hidden rounded bg-zinc-100 dark:bg-zinc-800">
+            <div className="mt-2 h-1 overflow-hidden rounded bg-stone-100 dark:bg-stone-800">
               <div
                 className="h-full bg-emerald-500 transition-all"
                 style={{ width: `${(doneSteps / total) * 100}%` }}
@@ -322,11 +322,11 @@ function TaskCard({
             </div>
           )}
         </button>
-        <span className="text-zinc-400">{open ? '▾' : '▸'}</span>
+        <span className="text-stone-400">{open ? '▾' : '▸'}</span>
       </div>
 
       {allDone && (
-        <div className="flex items-center gap-3 border-t border-zinc-100 bg-emerald-50 px-4 py-2 text-sm dark:border-zinc-800 dark:bg-emerald-950">
+        <div className="flex items-center gap-3 border-t border-stone-100 bg-emerald-50 px-4 py-2 text-sm dark:border-stone-800 dark:bg-emerald-950">
           <span>All steps done. Ready to mark it finished?</span>
           <Button variant="primary" onClick={finish}>
             Finished!
@@ -335,13 +335,13 @@ function TaskCard({
       )}
 
       {open && (
-        <div className="space-y-3 border-t border-zinc-100 px-4 py-3 dark:border-zinc-800">
+        <div className="space-y-3 border-t border-stone-100 px-4 py-3 dark:border-stone-800">
           {total === 0 ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <Button onClick={() => writeSteps()} disabled={writing}>
                 {writing ? 'Khushi is writing…' : 'Let Khushi write a to-do list'}
               </Button>
-              <span className="text-zinc-500">or add your own steps below.</span>
+              <span className="text-stone-500">or add your own steps below.</span>
             </div>
           ) : (
             <ul className="space-y-1">
@@ -359,10 +359,10 @@ function TaskCard({
                         )
                       }
                     />
-                    <span className={s.done ? 'text-zinc-400 line-through' : ''}>{s.text}</span>
+                    <span className={s.done ? 'text-stone-400 line-through' : ''}>{s.text}</span>
                   </label>
                   <button
-                    className="text-xs text-zinc-400 opacity-0 group-hover:opacity-100 hover:text-red-600"
+                    className="text-xs text-stone-400 opacity-0 group-hover:opacity-100 hover:text-red-600"
                     onClick={() =>
                       act(async () => onChange(await api.del<Task>(`/tasks/steps/${s.id}`)))
                     }
@@ -394,7 +394,7 @@ function TaskCard({
             <Button type="submit">Add</Button>
           </form>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-stone-500">
             {editingDate ? (
               <>
                 <input
@@ -471,7 +471,7 @@ function AddForm({
           })
         }}
       >
-        <label className="text-xs text-zinc-500">
+        <label className="text-xs text-stone-500">
           What do you need to do?
           <input
             className={inputClass}
@@ -481,7 +481,7 @@ function AddForm({
             onChange={(e) => setTitle(e.target.value)}
           />
         </label>
-        <label className="text-xs text-zinc-500">
+        <label className="text-xs text-stone-500">
           Subject
           <input
             className={inputClass}
@@ -495,7 +495,7 @@ function AddForm({
             ))}
           </datalist>
         </label>
-        <label className="text-xs text-zinc-500">
+        <label className="text-xs text-stone-500">
           Due
           <input
             type="date"

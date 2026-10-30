@@ -13,6 +13,13 @@ export const DOC_TYPES: { value: DocType; label: string }[] = [
 
 export const typeLabel = (t: DocType) => DOC_TYPES.find((d) => d.value === t)?.label ?? t
 
+/** Colour of one of Khushi's briefing lines by its tone, readable on haze, paper and ink. */
+export const LINE_TONE = {
+  info: '',
+  warn: 'text-amber-800 dark:text-amber-300',
+  good: 'text-emerald-700 dark:text-emerald-300',
+}
+
 export function formatDue(iso: string | null): string {
   if (!iso) return 'no date'
   const d = new Date(iso)
@@ -42,4 +49,18 @@ export function dueIn(daysLeft: number | null): string {
   if (daysLeft === -1) return '1 day late'
   if (daysLeft < 0) return `${-daysLeft} days late`
   return `in ${daysLeft} days`
+}
+
+/** "Friday 30 October 2026": always with the year, in the reader's language. */
+export function longDate(d: Date): string {
+  const part = (o: Intl.DateTimeFormatOptions) => d.toLocaleDateString(undefined, o)
+  return `${part({ weekday: 'long' })} ${d.getDate()} ${part({ month: 'long' })} ${d.getFullYear()}`
+}
+
+/** Midnight at the start of this week's Monday, local time. */
+export function startOfWeek(now: Date = new Date()): Date {
+  const d = new Date(now)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7))
+  return d
 }

@@ -65,7 +65,7 @@ export default function Settings() {
       <div className="space-y-6">
         <section>
           <h2 className="font-semibold">Subjects</h2>
-          <p className="mb-3 text-sm text-zinc-500">
+          <p className="mb-3 text-sm text-stone-500">
             Add the courses you are taking this semester. Include the short names and course
             codes that appear in your file names (like <em>DBMS</em> or <em>BCS403</em>) so files
             get sorted without needing the AI.
@@ -73,7 +73,7 @@ export default function Settings() {
 
           <Card>
             <form onSubmit={save} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_2fr_1fr_auto]">
-              <label className="text-xs text-zinc-500">
+              <label className="text-xs text-stone-500">
                 Name
                 <input
                   className={inputClass}
@@ -83,7 +83,7 @@ export default function Settings() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </label>
-              <label className="text-xs text-zinc-500">
+              <label className="text-xs text-stone-500">
                 Course code
                 <input
                   className={inputClass}
@@ -92,7 +92,7 @@ export default function Settings() {
                   onChange={(e) => setForm({ ...form, code: e.target.value })}
                 />
               </label>
-              <label className="text-xs text-zinc-500">
+              <label className="text-xs text-stone-500">
                 Other names (comma-separated)
                 <input
                   className={inputClass}
@@ -101,7 +101,7 @@ export default function Settings() {
                   onChange={(e) => setForm({ ...form, aliases: e.target.value })}
                 />
               </label>
-              <label className="text-xs text-zinc-500">
+              <label className="text-xs text-stone-500">
                 Semester
                 <input
                   className={inputClass}
@@ -132,8 +132,8 @@ export default function Settings() {
           </Card>
 
           {subjects.length > 0 && (
-            <Card className="mt-3 p-0">
-              <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <Card pad={false} className="mt-3">
+              <ul className="divide-y divide-stone-200 dark:divide-stone-800">
                 {subjects.map((s) => (
                   <li key={s.id} className="flex flex-wrap items-center gap-2 px-4 py-2 text-sm">
                     <SubjectDot color={s.color} />
@@ -142,8 +142,8 @@ export default function Settings() {
                     {s.aliases.map((a) => (
                       <Badge key={a}>{a}</Badge>
                     ))}
-                    {s.semester && <span className="text-zinc-500">{s.semester}</span>}
-                    <span className="text-zinc-400">
+                    {s.semester && <span className="text-stone-500">{s.semester}</span>}
+                    <span className="text-stone-400">
                       · {s.documents} file{s.documents === 1 ? '' : 's'}
                     </span>
                     <span className="ml-auto flex gap-1">
@@ -170,13 +170,13 @@ export default function Settings() {
             <h2 className="mb-3 font-semibold">Setup</h2>
             <Card>
               <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
-                <dt className="text-zinc-500">AI</dt>
+                <dt className="text-stone-500">AI</dt>
                 <dd>
                   {health.llm_provider === 'none'
                     ? 'Off - files are sorted by rules only, nothing leaves this computer'
                     : `${health.llm_provider} · ${health.llm_model}`}
                 </dd>
-                <dt className="text-zinc-500">Scanned PDFs (OCR)</dt>
+                <dt className="text-stone-500">Scanned PDFs (OCR)</dt>
                 <dd>
                   {health.ocr_available ? (
                     'Available'
@@ -187,7 +187,7 @@ export default function Settings() {
                     </>
                   )}
                 </dd>
-                <dt className="text-zinc-500">Reminders</dt>
+                <dt className="text-stone-500">Reminders</dt>
                 <dd>
                   {health.reminder_days.length
                     ? `${health.reminder_days.join(' and ')} days before each deadline`
@@ -204,15 +204,15 @@ export default function Settings() {
                     >
                       Send a test reminder
                     </Button>
-                    {testResult && <span className="text-xs text-zinc-500">{testResult}</span>}
+                    {testResult && <span className="text-xs text-stone-500">{testResult}</span>}
                   </div>
                 </dd>
-                <dt className="text-zinc-500">Watched folders</dt>
+                <dt className="text-stone-500">Watched folders</dt>
                 <dd className="font-mono text-xs">
                   {health.watch_dirs.join(', ')}
                   {health.watching ? '' : ' (not watching - scan manually)'}
                 </dd>
-                <dt className="text-zinc-500">Library</dt>
+                <dt className="text-stone-500">Library</dt>
                 <dd className="font-mono text-xs">{health.library_root}</dd>
               </dl>
             </Card>

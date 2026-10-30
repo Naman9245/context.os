@@ -1,16 +1,123 @@
 @import 'tailwindcss';
 
+/*
+ * ContextOS design tokens (see docs/DESIGN.md). A warm cream page, chunky
+ * cards in coral, sun, pine, lilac and tangerine, extra-round corners, a dark
+ * ink nav, Gabarito for display type and Figtree for text.
+ *
+ * Tailwind's stone, amber, emerald and red scales are re-tuned so every page
+ * picks up the palette: stone runs from paper to ink, amber is the sun,
+ * emerald the pine, red the coral. Text colours meet WCAG AA (4.5:1) on the
+ * surfaces they are used on.
+ */
 @theme {
-  --color-accent: oklch(0.62 0.17 265);
-  --color-accent-soft: oklch(0.95 0.03 265);
+  --font-sans: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Gabarito Variable', 'Figtree Variable', ui-sans-serif, sans-serif;
+
+  --color-stone-50: #fffbf4; /* paper: cards */
+  --color-stone-100: #f7efe2; /* cream: the page */
+  --color-stone-200: #ece1cf;
+  --color-stone-300: #dacbb5;
+  --color-stone-400: #736859;
+  --color-stone-500: #655b51; /* secondary text */
+  --color-stone-600: #574f47;
+  --color-stone-700: #443e38;
+  --color-stone-800: #2e2b33;
+  --color-stone-900: #1e1c23; /* ink */
+  --color-stone-950: #141318;
+
+  --color-coral: #e8614f;
+  --color-blush: #f9d5d0;
+  --color-sun: #f6b940;
+  --color-butter: #fce7b5;
+  --color-pine: #2e6b62;
+  --color-mint: #d3e8df;
+  --color-lilac: #a898f2;
+  --color-haze: #e7e1fd;
+  --color-tangerine: #f39a48;
+  --color-peach: #fddcbb;
+
+  /* Coral deep enough for small text: links, focus rings. */
+  --color-accent: #b53b2a;
+  --color-accent-soft: #f9d5d0;
+
+  --color-amber-50: #fef4dc;
+  --color-amber-100: #fde8b6;
+  --color-amber-200: #f8d488;
+  --color-amber-300: #f3c05c;
+  --color-amber-400: #edaa35;
+  --color-amber-500: #db921c;
+  --color-amber-600: #b97514;
+  --color-amber-700: #8f5811;
+  --color-amber-800: #774812;
+  --color-amber-900: #5f3a12;
+  --color-amber-950: #362009;
+
+  --color-emerald-50: #e3f1ec;
+  --color-emerald-100: #cfe6dd;
+  --color-emerald-200: #a8d2c3;
+  --color-emerald-300: #7fbba8;
+  --color-emerald-400: #4f9b87;
+  --color-emerald-500: #2f7f6d;
+  --color-emerald-600: #266b5c;
+  --color-emerald-700: #1f5a4e;
+  --color-emerald-800: #1a4a41;
+  --color-emerald-900: #163d36;
+  --color-emerald-950: #0f2925;
+
+  --color-red-50: #fdece8;
+  --color-red-100: #fbd8d1;
+  --color-red-200: #f5b5a8;
+  --color-red-300: #ee8e7d;
+  --color-red-400: #e66f5c;
+  --color-red-500: #d85543;
+  --color-red-600: #af3a2a;
+  --color-red-700: #93301f;
+  --color-red-800: #7a291b;
+  --color-red-900: #632319;
+  --color-red-950: #3a110c;
+
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 2.25rem;
+
+  --animate-rise: rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+}
+
+@layer base {
+  /* Checkboxes, sliders and radios in the palette instead of the browser's blue. */
+  :root {
+    accent-color: var(--color-accent);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }
 
 body {
-  @apply bg-zinc-50 text-zinc-900 antialiased;
+  @apply bg-stone-100 text-stone-900 antialiased;
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Lighter secondary text and links, so small text stays readable on ink. */
+  :root {
+    --color-stone-400: #b4a795;
+    --color-stone-500: #a99c8c;
+    --color-accent: #f08a78;
+  }
+
   body {
-    @apply bg-zinc-950 text-zinc-100;
+    @apply bg-stone-950 text-stone-100;
   }
 }

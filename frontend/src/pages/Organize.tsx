@@ -141,7 +141,7 @@ export default function Organize() {
             {running ? 'Scanning…' : 'Scan now'}
           </Button>
           {health && (
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-stone-500">
               {health.watching ? 'Watching' : 'Scanning'}{' '}
               <span className="font-mono">{health.watch_dirs.join(', ')}</span>
               {' · '}
@@ -182,14 +182,14 @@ export default function Organize() {
         {plan.length === 0 && !running ? (
           <Card className="py-10 text-center">
             <p className="font-medium">Nothing waiting to be organised.</p>
-            <p className="mt-1 text-sm text-zinc-500">
+            <p className="mt-1 text-sm text-stone-500">
               New files in your watched folders show up here automatically.
             </p>
           </Card>
         ) : (
           plan.length > 0 && (
-            <Card className="p-0">
-              <div className="flex flex-wrap items-center gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+            <Card pad={false}>
+              <div className="flex flex-wrap items-center gap-3 border-b border-stone-200 px-4 py-3 dark:border-stone-800">
                 <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
@@ -217,7 +217,7 @@ export default function Organize() {
                   </Button>
                 </div>
               </div>
-              <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+              <ul className="divide-y divide-stone-200 dark:divide-stone-800">
                 {plan.map((doc) => (
                   <PlanRow
                     key={doc.id}
@@ -241,18 +241,18 @@ export default function Organize() {
 
         {batches.length > 0 && (
           <section>
-            <h2 className="mb-2 text-sm font-semibold text-zinc-500">Recent moves</h2>
-            <Card className="p-0">
-              <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+            <h2 className="mb-2 text-sm font-semibold text-stone-500">Recent moves</h2>
+            <Card pad={false}>
+              <ul className="divide-y divide-stone-200 text-sm dark:divide-stone-800">
                 {batches.map((b) => (
                   <li key={b.batch_id} className="flex items-center gap-3 px-4 py-2">
                     <span>
                       {b.count} file{b.count === 1 ? '' : 's'}
                     </span>
-                    <span className="text-zinc-500">{timeAgo(b.moved_at)}</span>
+                    <span className="text-stone-500">{timeAgo(b.moved_at)}</span>
                     <span className="ml-auto">
                       {b.undone ? (
-                        <span className="text-xs text-zinc-500">undone</span>
+                        <span className="text-xs text-stone-500">undone</span>
                       ) : (
                         <Button variant="ghost" onClick={() => undo(b.batch_id)} disabled={busy}>
                           Undo
@@ -268,7 +268,7 @@ export default function Organize() {
 
         <section>
           <button
-            className="text-sm text-zinc-500 hover:underline"
+            className="text-sm text-stone-500 hover:underline"
             onClick={async () =>
               setSkipped(skipped ? null : await api.get<Doc[]>('/organize/plan?status=skipped'))
             }
@@ -276,11 +276,11 @@ export default function Organize() {
             {skipped ? 'Hide' : 'Show'} files you chose to leave where they are
           </button>
           {skipped && (
-            <Card className="mt-2 p-0">
+            <Card pad={false} className="mt-2">
               {skipped.length === 0 ? (
-                <p className="px-4 py-3 text-sm text-zinc-500">None.</p>
+                <p className="px-4 py-3 text-sm text-stone-500">None.</p>
               ) : (
-                <ul className="divide-y divide-zinc-200 text-sm dark:divide-zinc-800">
+                <ul className="divide-y divide-stone-200 text-sm dark:divide-stone-800">
                   {skipped.map((d) => (
                     <li key={d.id} className="flex items-center gap-3 px-4 py-2">
                       <span className="truncate">{d.filename}</span>
@@ -309,9 +309,9 @@ function ScanProgress({ status }: { status: ScanStatus }) {
             ? `Reading ${Math.min(status.done + 1, status.total)} of ${status.total}`
             : 'Looking for new files…'}
         </span>
-        <span className="truncate pl-4 font-mono text-xs text-zinc-500">{status.current}</span>
+        <span className="truncate pl-4 font-mono text-xs text-stone-500">{status.current}</span>
       </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded bg-zinc-100 dark:bg-zinc-800">
+      <div className="mt-2 h-1.5 overflow-hidden rounded bg-stone-100 dark:bg-stone-800">
         <div className="bg-accent h-full transition-all" style={{ width: `${pct}%` }} />
       </div>
     </Card>
@@ -328,7 +328,7 @@ function ScanSummary({ status }: { status: ScanStatus }) {
     r.errors.length && `${r.errors.length} could not be read`,
   ].filter(Boolean)
   return (
-    <p className="text-sm text-zinc-500">
+    <p className="text-sm text-stone-500">
       Last scan {status.finished_at ? timeAgo(status.finished_at) : ''}: {parts.join(' · ')}.
       {r.llm_errors > 0 && ` The AI was unavailable for ${r.llm_errors}, so rules were used.`}
     </p>
@@ -357,7 +357,7 @@ function PlanRow({
   const sure = doc.classified_by === 'you' || doc.confidence >= 0.6
 
   return (
-    <li className={selected ? 'bg-accent-soft/40 dark:bg-zinc-800/40' : ''}>
+    <li className={selected ? 'bg-accent-soft/40 dark:bg-stone-800/40' : ''}>
       <div className="flex gap-3 px-4 py-3">
         <input type="checkbox" className="mt-1" checked={selected} onChange={onToggle} />
         <div className="min-w-0 flex-1">
@@ -392,7 +392,7 @@ function PlanRow({
               </Badge>
             ))}
           </div>
-          <div className="mt-1 text-xs text-zinc-500">
+          <div className="mt-1 text-xs text-stone-500">
             <button
               className="truncate font-mono hover:underline"
               title="Open this file"
@@ -405,10 +405,10 @@ function PlanRow({
               {parts.map((p, i) => (
                 <span key={i}>
                   {p}
-                  <span className="px-1 text-zinc-400">/</span>
+                  <span className="px-1 text-stone-400">/</span>
                 </span>
               ))}
-              <span className="text-zinc-800 dark:text-zinc-200">{file}</span>
+              <span className="text-stone-800 dark:text-stone-200">{file}</span>
             </span>
           </div>
         </div>
@@ -457,8 +457,8 @@ function EditForm({
   }
 
   return (
-    <div className="grid gap-3 border-t border-zinc-200 bg-zinc-50 px-4 py-3 sm:grid-cols-2 lg:grid-cols-4 dark:border-zinc-800 dark:bg-zinc-950">
-      <label className="text-xs text-zinc-500">
+    <div className="grid gap-3 border-t border-stone-200 bg-stone-100 px-4 py-3 sm:grid-cols-2 lg:grid-cols-4 dark:border-stone-800 dark:bg-stone-950">
+      <label className="text-xs text-stone-500">
         Subject
         <input
           className={inputClass}
@@ -473,7 +473,7 @@ function EditForm({
           ))}
         </datalist>
       </label>
-      <label className="text-xs text-zinc-500">
+      <label className="text-xs text-stone-500">
         Type
         <select
           className={inputClass}
@@ -487,11 +487,11 @@ function EditForm({
           ))}
         </select>
       </label>
-      <label className="text-xs text-zinc-500">
+      <label className="text-xs text-stone-500">
         Title
         <input className={inputClass} value={title} onChange={(e) => setTitle(e.target.value)} />
       </label>
-      <label className="text-xs text-zinc-500">
+      <label className="text-xs text-stone-500">
         Semester
         <input
           className={inputClass}
@@ -504,7 +504,7 @@ function EditForm({
         <Button variant="primary" onClick={save} disabled={saving}>
           Save
         </Button>
-        <span className="text-xs text-zinc-500">
+        <span className="text-xs text-stone-500">
           A new subject name creates that subject.
         </span>
         {error && <span className="text-xs text-red-600">{error}</span>}

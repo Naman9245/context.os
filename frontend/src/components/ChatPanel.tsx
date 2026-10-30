@@ -176,9 +176,9 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
         {messages?.length === 0 && (
           <div className="flex gap-3">
             <KhushiAvatar size={compact ? 32 : 40} />
-            <div className="rounded-2xl rounded-tl-sm border border-zinc-200 bg-white px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="rounded-2xl rounded-tl-sm border border-stone-200 bg-stone-50 px-4 py-3 text-sm dark:border-stone-800 dark:bg-stone-900">
               <p className="font-medium">Hi! I'm Khushi.</p>
-              <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+              <p className="mt-1 text-stone-600 dark:text-stone-400">
                 I can sort your files, keep track of assignments, open apps, search the web and
                 play music. Try one of these, or just ask me something.
               </p>
@@ -188,7 +188,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
         {messages?.map((m) =>
           m.role === 'user' ? (
             <div key={m.id} className="flex justify-end">
-              <div className="bg-accent max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-2 text-sm whitespace-pre-line text-white">
+              <div className="max-w-[85%] rounded-2xl rounded-tr-sm bg-coral px-4 py-2 text-sm whitespace-pre-line text-stone-900">
                 {m.text}
               </div>
             </div>
@@ -205,7 +205,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
         {sending && (
           <div className="flex items-center gap-3">
             <KhushiAvatar size={compact ? 32 : 40} />
-            <span className="text-sm text-zinc-500">
+            <span className="text-sm text-stone-500">
               Khushi is thinking<span className="animate-pulse">…</span>
             </span>
           </div>
@@ -221,7 +221,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
             <button
               key={s}
               onClick={() => send(s)}
-              className="hover:border-accent hover:text-accent rounded-full border border-zinc-300 px-3 py-1 text-xs dark:border-zinc-700"
+              className="hover:border-accent hover:text-accent rounded-full border border-stone-300 px-3 py-1 text-xs dark:border-stone-700"
             >
               {s}
             </button>
@@ -241,7 +241,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
       )}
 
       <form
-        className={`flex items-end gap-2 border-t border-zinc-200 dark:border-zinc-800 ${compact ? 'p-3' : 'pt-3'}`}
+        className={`flex items-end gap-2 border-t border-stone-200 dark:border-stone-800 ${compact ? 'p-3' : 'pt-3'}`}
         onSubmit={(e) => {
           e.preventDefault()
           send(text)
@@ -257,7 +257,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
             aria-label={voice.speak ? 'Mute Khushi' : 'Let Khushi speak'}
             aria-pressed={voice.speak}
             title={voice.speak ? 'Khushi speaks her replies (click to mute)' : 'Khushi is muted'}
-            className={`rounded-full p-2 ${voice.speak ? 'text-accent' : 'text-zinc-400'} hover:bg-zinc-100 dark:hover:bg-zinc-800`}
+            className={`rounded-full p-2 ${voice.speak ? 'text-accent' : 'text-stone-400'} hover:bg-stone-100 dark:hover:bg-stone-800`}
           >
             {voice.speak ? <SpeakerIcon /> : <SpeakerOffIcon />}
           </button>
@@ -278,7 +278,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
           }}
           placeholder={listening ? 'Listening… tap stop when you are done' : 'Ask Khushi anything…'}
           aria-label="Message Khushi"
-          className={`focus:border-accent min-w-0 flex-1 resize-none rounded-2xl border bg-white px-4 py-2 text-sm leading-5 outline-none dark:bg-zinc-950 ${listening ? 'border-red-400' : 'border-zinc-300 dark:border-zinc-700'}`}
+          className={`focus:border-accent min-w-0 flex-1 resize-none rounded-2xl border bg-stone-50 px-4 py-2 text-sm leading-5 outline-none dark:bg-stone-950 ${listening ? 'border-red-400' : 'border-stone-300 dark:border-stone-700'}`}
         />
         {canListen() && (
           <button
@@ -288,7 +288,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
             aria-label={listening ? 'Stop listening' : 'Talk to Khushi'}
             aria-pressed={listening}
             title={listening ? 'Stop listening (your words stay in the box)' : 'Talk to Khushi'}
-            className={`rounded-full p-2 disabled:opacity-50 ${listening ? 'bg-red-500 text-white hover:bg-red-600' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'}`}
+            className={`rounded-full p-2 disabled:opacity-50 ${listening ? 'bg-red-500 text-white hover:bg-red-600' : 'text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800'}`}
           >
             {listening ? <StopIcon /> : <MicIcon />}
           </button>
@@ -296,7 +296,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
         <button
           type="submit"
           disabled={!text.trim() || sending}
-          className="bg-accent h-9 rounded-full px-4 text-sm font-medium text-white disabled:opacity-50"
+          className="h-9 rounded-full bg-stone-900 px-4 text-sm font-semibold text-stone-50 hover:bg-stone-700 disabled:opacity-40 dark:bg-sun dark:text-stone-900 dark:hover:bg-butter"
         >
           Send
         </button>
@@ -304,7 +304,7 @@ export default function ChatPanel({ compact = false }: { compact?: boolean }) {
           <button
             type="button"
             onClick={clear}
-            className="text-xs text-zinc-500 hover:underline"
+            className="text-xs text-stone-500 hover:underline"
             title="Clear the conversation"
           >
             Clear
@@ -333,7 +333,7 @@ function KhushiMessage({
       </div>
       <div className="min-w-0 max-w-[90%] space-y-2">
         <div className="group flex items-start gap-1">
-          <div className="rounded-2xl rounded-tl-sm border border-zinc-200 bg-white px-4 py-2 text-sm whitespace-pre-line dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-2xl rounded-tl-sm border border-stone-200 bg-stone-50 px-4 py-2 text-sm whitespace-pre-line dark:border-stone-800 dark:bg-stone-900">
             {m.text}
           </div>
           {onSpeak && (
@@ -341,7 +341,7 @@ function KhushiMessage({
               onClick={onSpeak}
               aria-label={speaking ? 'Stop reading' : 'Read this aloud'}
               title={speaking ? 'Stop' : 'Read aloud'}
-              className={`mt-1 shrink-0 rounded-full p-1 ${speaking ? 'text-accent' : 'text-zinc-400 opacity-0 group-hover:opacity-100 focus:opacity-100'} hover:bg-zinc-100 dark:hover:bg-zinc-800`}
+              className={`mt-1 shrink-0 rounded-full p-1 ${speaking ? 'text-accent' : 'text-stone-400 opacity-0 group-hover:opacity-100 focus:opacity-100'} hover:bg-stone-100 dark:hover:bg-stone-800`}
             >
               {speaking ? <StopIcon /> : <SpeakerIcon />}
             </button>
@@ -366,16 +366,16 @@ function KhushiMessage({
         )}
 
         {m.tasks.length > 0 && (
-          <ul className="divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-200 bg-white text-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+          <ul className="divide-y divide-stone-100 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 text-sm dark:divide-stone-800 dark:border-stone-800 dark:bg-stone-900">
             {m.tasks.map((t) => (
               <li key={t.id}>
-                <Link to="/tasks" className="flex items-center gap-2 px-3 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800/50">
+                <Link to="/tasks" className="flex items-center gap-2 px-3 py-2 hover:bg-stone-100 dark:hover:bg-stone-800/50">
                   <SubjectDot color={t.subject_color} />
-                  <span className={`min-w-0 flex-1 truncate ${t.status === 'done' ? 'text-zinc-400 line-through' : ''}`}>
+                  <span className={`min-w-0 flex-1 truncate ${t.status === 'done' ? 'text-stone-400 line-through' : ''}`}>
                     {t.title}
                   </span>
                   <span
-                    className={`shrink-0 text-xs ${t.days_left !== null && t.days_left < 0 ? 'text-red-600' : 'text-zinc-500'}`}
+                    className={`shrink-0 text-xs ${t.days_left !== null && t.days_left < 0 ? 'text-red-600' : 'text-stone-500'}`}
                   >
                     {t.status === 'done'
                       ? 'finished'
@@ -390,17 +390,17 @@ function KhushiMessage({
         )}
 
         {m.files.length > 0 && (
-          <ul className="divide-y divide-zinc-100 overflow-hidden rounded-lg border border-zinc-200 bg-white text-sm dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+          <ul className="divide-y divide-stone-100 overflow-hidden rounded-lg border border-stone-200 bg-stone-50 text-sm dark:divide-stone-800 dark:border-stone-800 dark:bg-stone-900">
             {m.files.map((f) => (
               <li key={f.id}>
                 <button
                   onClick={() => api.post(`/files/${f.id}/open`)}
                   title={`Open ${f.filename}`}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/50"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left hover:bg-stone-100 dark:hover:bg-stone-800/50"
                 >
                   <Badge>{typeLabel(f.doc_type)}</Badge>
                   <span className="min-w-0 flex-1 truncate">{f.title ?? f.filename}</span>
-                  <span className="shrink-0 text-xs text-zinc-500">{f.subject}</span>
+                  <span className="shrink-0 text-xs text-stone-500">{f.subject}</span>
                 </button>
               </li>
             ))}

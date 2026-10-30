@@ -16,7 +16,7 @@ export default function ExtensionSettings({ initial }: { initial: Health }) {
   return (
     <section>
       <h2 className="font-semibold">Khushi for Chrome</h2>
-      <p className="mb-3 text-sm text-zinc-500">
+      <p className="mb-3 text-sm text-stone-500">
         Khushi can't see inside Chrome on her own. With this extension she keeps one tab per
         site and reuses it ("open YouTube", then "search carryminati", stays in the same tab),
         and she can open the first result when you say "open it" or "play the first video".

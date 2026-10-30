@@ -25,12 +25,12 @@ export default function VoiceSettings() {
   return (
     <section>
       <h2 className="font-semibold">Khushi's voice</h2>
-      <p className="mb-3 text-sm text-zinc-500">
+      <p className="mb-3 text-sm text-stone-500">
         She can read her replies aloud, and you can talk to her with the mic button in the chat.
       </p>
       <Card>
         {!canSpeak() ? (
-          <p className="text-sm text-zinc-500">This browser can't speak. Try Google Chrome.</p>
+          <p className="text-sm text-stone-500">This browser can't speak. Try Google Chrome.</p>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="flex items-center gap-2 text-sm sm:col-span-2">
@@ -41,7 +41,7 @@ export default function VoiceSettings() {
               />
               Read Khushi's replies aloud
             </label>
-            <label className="text-xs text-zinc-500">
+            <label className="text-xs text-stone-500">
               Voice
               <select
                 className={inputClass}
@@ -55,7 +55,7 @@ export default function VoiceSettings() {
                 ))}
               </select>
             </label>
-            <label className="text-xs text-zinc-500">
+            <label className="text-xs text-stone-500">
               Speed: {voice.rate.toFixed(1)}×
               <input
                 type="range"
@@ -78,9 +78,9 @@ export default function VoiceSettings() {
             </div>
           </div>
         )}
-        <div className="mt-4 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+        <div className="mt-4 border-t border-stone-100 pt-4 dark:border-stone-800">
           {canListen() ? (
-            <label className="block text-xs text-zinc-500 sm:w-1/2">
+            <label className="block text-xs text-stone-500 sm:w-1/2">
               Language you speak in
               <select
                 className={inputClass}
@@ -99,7 +99,7 @@ export default function VoiceSettings() {
               </span>
             </label>
           ) : (
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-stone-500">
               Talking to Khushi needs Google Chrome. You can still type to her here.
             </p>
           )}

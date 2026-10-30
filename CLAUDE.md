@@ -190,6 +190,19 @@ node --test browser-extension/*.test.mjs     # tab logic; Load unpacked to try i
   (`intents.fuzzy_service`: "spotigfy" -> spotify). Corrections ("not on
   youtube, I want spotify") repeat the last play/search via `Reply.redo` - no LLM.
 
+## Design
+
+- The UI follows `docs/DESIGN.md`: a cream page, paper cards, colour cards in
+  coral/sun/pine/lilac/tangerine, big radii, Gabarito for display and Figtree
+  for text (bundled through fontsource - never load fonts from Google), a dark
+  rail (a bottom bar on phones). The tokens are in `frontend/src/index.css`,
+  where Tailwind's stone/amber/emerald/red scales are re-tuned to the palette.
+- Use `Card` (`tone`; `pad={false}`, never padding through `className`),
+  `Button`, `Badge` and `ArrowCircle`. Ink text on colour cards, and
+  `text-accent`, not coral, for small text. Check any new colour pair for 4.5:1.
+- Check new screens in light and dark mode and at 375px wide. A grid holding
+  truncated text needs `grid-cols-1` on phones.
+
 ## Gemini free tier, as observed 2026-10-15
 
 - Use a **chain** of models (`GEMINI_FALLBACK_MODEL=a,b,c`): free quotas are per

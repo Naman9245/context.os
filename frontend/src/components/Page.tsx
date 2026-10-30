@@ -10,18 +10,38 @@ export default function Page({
   children?: ReactNode
 }) {
   return (
-    <section className="mx-auto max-w-5xl">
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      {subtitle && <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>}
-      <div className="mt-6">{children}</div>
+    <section className="mx-auto max-w-6xl">
+      <header className="mb-7">
+        <h1 className="font-display text-4xl leading-none font-extrabold tracking-tight sm:text-5xl">
+          {title}
+        </h1>
+        {subtitle && <p className="mt-3 text-stone-500">{subtitle}</p>}
+      </header>
+      {children}
     </section>
   )
 }
 
-export function ComingSoon({ phase }: { phase: string }) {
+// Decorative capsule bars, shaped like the weekly chart the page will show.
+const PREVIEW_BARS = [45, 70, 55, 90, 62, 30, 78]
+
+/** A page a later phase builds: what it will do, with a preview of its chart. */
+export function ComingSoon({ phase, about }: { phase: string; about: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-500 dark:border-zinc-700">
-      Arrives in {phase}.
+    <div className="overflow-hidden rounded-[32px] bg-lilac p-6 text-stone-900 sm:p-8">
+      <p className="text-sm font-bold">Coming in {phase}</p>
+      <p className="mt-2 max-w-xl font-display text-2xl leading-tight font-bold sm:text-3xl">
+        {about}
+      </p>
+      <div aria-hidden className="mt-8 flex h-40 items-end gap-2 sm:gap-3">
+        {PREVIEW_BARS.map((height, i) => (
+          <div
+            key={i}
+            className={`flex-1 rounded-full ${i === 3 ? 'bg-stone-900' : 'bg-stone-50/70'}`}
+            style={{ height: `${height}%` }}
+          />
+        ))}
+      </div>
     </div>
   )
 }

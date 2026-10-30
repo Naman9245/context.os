@@ -35,9 +35,10 @@ its design, its tests and what "done" means. How the current code works is in
 | 04b, 06-09 | always on, notes search, exam mode, more inboxes, packaging | planned in sections 5-9 |
 
 Checked on 30 October 2026 on Windows: 282 backend tests (281 pass, one skips
-without Tesseract), 25 frontend tests and 13 extension tests, all green; ruff
+without Tesseract), 31 frontend tests and 13 extension tests, all green; ruff
 clean; the frontend builds. The Windows fixes for plan destinations and app
-detection are in `bcb3706`.
+detection are in `bcb3706`. The whole interface follows the design system in
+[DESIGN.md](DESIGN.md), adopted the same day.
 
 ## 3. Roadmap
 
@@ -164,6 +165,8 @@ allowlist (`ChatPlan.action`) as `start_timer`, `stop_timer` and `week_stats`.
 
 ### Pages
 
+- Everything follows [DESIGN.md](DESIGN.md): lilac is Progress's colour, and the
+  chart uses capsule bars like the placeholder's preview.
 - `/progress` replaces the placeholder:
   - a timer card: subject picker in subject colours, 25 and 50 minute presets
     or no limit, Start and Stop, and the elapsed time worked out from
@@ -200,8 +203,8 @@ All must pass on Windows and Linux.
 - `tests/test_chat.py`: each new command, the case-insensitive test, the
   briefing line.
 - vitest for the pure helpers in a new `frontend/src/lib/progress.ts`:
-  formatting minutes (95 becomes "1 h 35 min") and week arithmetic (the Monday
-  of a date, the previous and next week).
+  formatting minutes (95 becomes "1 h 35 min") and moving to the previous and
+  next week, on top of `startOfWeek` in `lib/labels.ts` (already tested).
 - By hand: start a 1-minute countdown, reload the page halfway (the timer
   carries on), restart the server halfway (still running), let it finish
   (closed at 1 minute), see the chart update; with `LLM_PROVIDER=none` the
@@ -237,7 +240,9 @@ Linux, and every push is tested on both.
 3. **OCR on Windows**: if `tesseract` is not on PATH, look in
    `%ProgramFiles%\Tesseract-OCR\tesseract.exe` and point pytesseract at it; a
    new `TESSERACT_CMD` setting overrides the search. The README gains
-   `winget install UB-Mannheim.TesseractOCR`.
+   `winget install UB-Mannheim.TesseractOCR`. The Organize page's hint tells
+   everyone to run `sudo apt install tesseract-ocr`, even on Windows: it should
+   show the winget command there, which needs the platform in `/api/health`.
 4. **Watch subfolders**: watch recursively, but only react to files within
    `SCAN_MAX_DEPTH` levels and never to files inside the library, which can sit
    inside Downloads.
@@ -449,6 +454,8 @@ Every change, however small, meets all of these before it is committed.
     the mic.
 11. **Docs updated**: CLAUDE.md for rules and decisions, ARCHITECTURE.md for
     structure, this file for status.
+12. **The look holds**: new screens follow [DESIGN.md](DESIGN.md) and are
+    checked in light and dark mode, at 375px wide, and with the keyboard.
 
 ## 12. Risks
 

@@ -10,7 +10,13 @@ import Tasks from './pages/Tasks'
 
 // Pages that do not exist yet render a placeholder naming the phase that builds them.
 const PLACEHOLDERS = [
-  { path: 'progress', title: 'Progress', subtitle: 'How your week went.', phase: 'Phase 4' },
+  {
+    path: 'progress',
+    title: 'Progress',
+    subtitle: 'How your week went.',
+    phase: 'Phase 4',
+    about: "A study timer, a chart of where your hours went, and Khushi's take on your week.",
+  },
 ]
 
 export default function App() {
@@ -30,7 +36,7 @@ export default function App() {
               path={p.path}
               element={
                 <Page title={p.title} subtitle={p.subtitle}>
-                  <ComingSoon phase={p.phase} />
+                  <ComingSoon phase={p.phase} about={p.about} />
                 </Page>
               }
             />
